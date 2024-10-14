@@ -1,5 +1,8 @@
+import {create, all, Matrix, MathArray, forEach, MathCollection} from 'mathjs';
 import React, { useState, useEffect } from 'react';
 import Graph from './Graph';
+
+const math = create(all);
 
 interface GraphMatrixComponentProps {
     graph: Graph;
@@ -37,6 +40,8 @@ const GraphMatrixComponent: React.FC<GraphMatrixComponentProps> = ({ graph, onUp
         const newMatrix = matrix.map(row => [...row, 0]);
         newMatrix.push(Array(newNodes.length).fill(0));
         setMatrix(newMatrix);
+
+        onUpdateGraphString(Graph.fromAdjacencyMatrix(math.matrix(newMatrix), newNodes, graph.isDirected).toString());
     };
 
     const handleRemoveNode = (index: number) => {
@@ -45,6 +50,8 @@ const GraphMatrixComponent: React.FC<GraphMatrixComponentProps> = ({ graph, onUp
 
         const newMatrix = matrix.filter((_, i) => i !== index).map(row => row.filter((_, j) => j !== index));
         setMatrix(newMatrix);
+
+        onUpdateGraphString(Graph.fromAdjacencyMatrix(math.matrix(newMatrix), newNodes, graph.isDirected).toString());
     };
 
     const handleUpdate = () => {
@@ -72,12 +79,14 @@ const GraphMatrixComponent: React.FC<GraphMatrixComponentProps> = ({ graph, onUp
                                 value={node}
                                 onChange={(e) => handleNodesChange(e, index)}
                                 style={{ marginRight: '10px' }}
+                                disabled={true}
                             />
                             <button onClick={() => handleRemoveNode(index)}>Remove</button>
                         </li>
                     ))}
                 </ul>
-                <button onClick={handleAddNode}>Add Node</button><button onClick={handleUpdate}>Update Graph</button>
+                <button onClick={handleAddNode}>Add Node</button>
+                {/*<button onClick={handleUpdate}>Update Graph</button>*/}
             </div>
             <div style={{ width: '75%' }}>
                 <h3>Adjacency Matrix</h3>

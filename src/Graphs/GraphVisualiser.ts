@@ -1,6 +1,5 @@
 import p5 from 'p5';
 import Graph from './Graph';
-import graph from "./Graph";
 
 class GraphVisualiser {
     public p5Instance: p5;
@@ -74,6 +73,7 @@ class GraphVisualiser {
         const adjacencyMatrix = this.graph.getAdjacencyMatrix();
         const size = adjacencyMatrix.size()[0];
         const desiredDistance = 150; // Desired distance between connected nodes
+        const desiredDisconnectedDistance = 300; // Desired distance between disconnected nodes
 
         for (let i = 0; i < size; i++) {
             for (let j = i + 1; j < size; j++) {
@@ -85,10 +85,10 @@ class GraphVisualiser {
                 if (adjacencyMatrix.get([i, j]) !== 0) {
                     // Nodes are linked, apply attractive force
                     force = k * (distance - desiredDistance);
-                } else if(distance < 2 * desiredDistance)  {
+                } else if(distance < desiredDisconnectedDistance)  {
                     // Nodes are not linked, apply repulsive force only
 
-                    force = -k * desiredDistance / (distance * 0.1);
+                    force = -k * desiredDisconnectedDistance / (distance * 0.1);
                 }
 
                 const fx = (dx / distance) * force;
