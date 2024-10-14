@@ -1,4 +1,4 @@
-import { create, all, Matrix, MathArray } from 'mathjs';
+import {create, all, Matrix, MathArray, forEach, MathCollection} from 'mathjs';
 
 const math = create(all);
 
@@ -84,6 +84,15 @@ class Graph {
         return this.isDirected ? count : count / 2;
     }
 
+    public getDegree(selectedNode: number): number {
+        const nodeIndex = this.nodeAliasMap.get(selectedNode);
+        if (nodeIndex !== undefined) {
+            const row = this.adjacencyMatrix.subset(math.index(nodeIndex, math.range(0, this.adjacencyMatrix.size()[1])));
+            return math.sum(row) as number;
+        }
+        return 0;
+    }
+
     public getAverageDegree(): number {
         const nodeCount = this.getNodeCount();
         const linkCount = this.getLinkCount();
@@ -149,10 +158,20 @@ class Graph {
         return diameter;
     }
 
-/*    public getSpectralDecomposition(): { eigenvalues: MathArray, eigenvectors: Matrix } {
-        const {eigenvalues, eigenvectors} = math.eigs(this.adjacencyMatrix);
-        return {eigenvalues, eigenvectors: eigenvectors as Matrix};
-    }*/
+    public getSpectralDecomposition(): { X: Matrix, Diag: Matrix } {
+        let { eigenvectors } = math.eigs(this.adjacencyMatrix);
+
+        eigenvectors = eigenvectors.sort((a, b) => (b.value as number) - (a.value as number));
+
+        const eigenVectors = eigenvectors.map((obj: any) => obj.vector);
+        const Values = eigenvectors.map((obj: any) => obj.value);
+
+        const X = math.round(math.transpose(math.matrix(eigenVectors)), 3) as Matrix;
+        const Diag = math.round(math.matrix(math.diag(Values)), 3) as Matrix;
+
+        return { X, Diag };
+    }
+
 
     public toString(): string {
         const links: [number, number][] = [];

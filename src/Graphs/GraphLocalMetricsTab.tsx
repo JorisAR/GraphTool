@@ -9,6 +9,12 @@ interface GraphLocalMetricsTabProps {
 const GraphLocalMetricsTab: React.FC<GraphLocalMetricsTabProps> = ({ graph }) => {
     const [selectedNode, setSelectedNode] = useState<number | null>(null);
 
+    let degree = 0;
+
+    if(selectedNode !== null) {
+        degree = graph.getDegree(selectedNode.valueOf());
+    }
+
     const handleNodeSelect = (node: number) => {
         setSelectedNode(node);
     };
@@ -30,7 +36,7 @@ const GraphLocalMetricsTab: React.FC<GraphLocalMetricsTabProps> = ({ graph }) =>
                 <div>
                     <h4>Metrics for Node {selectedNode}</h4>
                     {/* Add specific metrics calculations here for the selected node */}
-                    <p>Example Metric: {selectedNode}</p>
+                    <p>Node degree: {degree}</p>
                 </div>
             )}
         </CollapsibleTab>

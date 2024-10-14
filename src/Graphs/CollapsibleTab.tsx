@@ -7,7 +7,7 @@ interface CollapsibleTabProps {
 }
 
 const CollapsibleTab: React.FC<CollapsibleTabProps> = ({ title, children }) => {
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
 
     const toggleOpen = () => setIsOpen(!isOpen);
 

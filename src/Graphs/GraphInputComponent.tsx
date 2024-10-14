@@ -23,7 +23,7 @@ const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graphString, 
     return (
         <div>
             <h3>Input</h3>
-            <textarea rows={10} cols={30} value={input} onChange={handleChange} />
+            <textarea rows={10} cols={30} value={input} onChange={handleChange} /><br/>
             <button onClick={handleUpdate}>Update Graph</button>
         </div>
     );

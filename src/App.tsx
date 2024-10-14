@@ -5,8 +5,9 @@ import GraphVisualiserComponent from './Graphs/GraphVisualiserComponent';
 import GraphMatrixComponent from './Graphs/GraphMatrixComponent';
 import GraphMetricsComponent from "Graphs/GraphMetricsTab";
 import GraphMetricsTab from "Graphs/GraphMetricsTab";
-import GraphLaplacianTab from "Graphs/GraphLaplacianTab";
-import GraphLocalMetricsTab from "Graphs/ReactLocalMetricsTab";
+import GraphMatricesTab from "Graphs/GraphMatricesTab";
+import GraphLocalMetricsTab from "Graphs/GraphLocalMetricsTab";
+import GraphSpectrumTab from "Graphs/GraphSpectrumTab";
 
 const App: React.FC = () => {
     const initialNodes = [0, 1, 2, 3];
@@ -51,9 +52,10 @@ const App: React.FC = () => {
                 </div>
             </div>
             <div style={{ width: '50%', padding: '10px' }}>
+                <GraphMatricesTab graph={graph} />
                 <GraphMetricsTab graph={graph} />
-                <GraphLaplacianTab graph={graph} />
                 <GraphLocalMetricsTab graph={graph} />
+                <GraphSpectrumTab graph={graph} />
                 {/* Add more tabs here */}
             </div>
         </div>
