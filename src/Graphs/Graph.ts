@@ -6,7 +6,7 @@ class Graph {
     private adjacencyMatrix: Matrix;
     private nodeAliasMap: Map<number, number>;
     private nodeList: number[];
-    public isDirected: boolean;
+    private isDirected: boolean;
 
     constructor(matrix?: Matrix, nodeList?: number[], isDirected = false) {
         this.adjacencyMatrix = matrix || math.matrix();
@@ -18,6 +18,28 @@ class Graph {
             nodeList.forEach((node, index) => {
                 this.nodeAliasMap.set(node, index);
             });
+        }
+
+        if(!isDirected) this.makeSymmetric();
+    }
+
+    public getIsDirected() : boolean {
+        return this.isDirected;
+    }
+
+    public setIsDirected(value: boolean) {
+        if(!value) {
+            this.makeSymmetric();
+        }
+        this.isDirected = value;
+    }
+
+    public makeSymmetric() {
+        const size = this.adjacencyMatrix.size()[0];
+        for(let i = 1; i < size; i++) {
+            for(let j = 0; j < i; j++) {
+                this.adjacencyMatrix.set([i,j], this.adjacencyMatrix.get([j,i]));
+            }
         }
     }
 
@@ -168,19 +190,24 @@ class Graph {
         return diameter;
     }
 
-    public getSpectralDecomposition(): { X: Matrix, Diag: Matrix } {
-        let { eigenvectors } = math.eigs(this.adjacencyMatrix);
-
-        eigenvectors = eigenvectors.sort((a, b) => (b.value as number) - (a.value as number));
-
-        const eigenVectors = eigenvectors.map((obj: any) => obj.vector);
-        const Values = eigenvectors.map((obj: any) => obj.value);
-
-        const X = math.round(math.transpose(math.matrix(eigenVectors)), 3) as Matrix;
-        const Diag = math.round(math.matrix(math.diag(Values)), 3) as Matrix;
-
-        return { X, Diag };
+    public getSpectralDecomposition(): { vectors: Matrix, values: Matrix } {
+        try {
+            let { eigenvectors } = math.eigs(this.adjacencyMatrix);
+            eigenvectors = eigenvectors.sort((a, b) => (b.value as number) - (a.value as number));
+            const eigenVectors = eigenvectors.map((obj: any) => obj.vector);
+            const Values = eigenvectors.map((obj: any) => obj.value);
+            const X = math.round(math.transpose(math.matrix(eigenVectors)), 3) as Matrix;
+            const Diag = math.round(math.matrix(math.diag(Values)), 3) as Matrix;
+            return { vectors: X, values: Diag };
+        } catch (error) {
+            console.error("Eigenvalues failed to converge:", error);
+            const size = this.adjacencyMatrix.size();
+            const I = math.identity(size[0]) as Matrix;
+            const J = math.matrix(math.zeros(size[0], size[1]));
+            return { vectors: I, values: J };
+        }
     }
+
 
 
     public toString(): string {

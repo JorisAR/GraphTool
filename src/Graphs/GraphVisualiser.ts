@@ -145,7 +145,7 @@ class GraphVisualiser {
                     p.line(x, y, xJ, yJ);
 
                     // Draw arrowhead for directed edges
-                    if (this.graph.isDirected) {
+                    if (this.graph.getIsDirected()) {
                         const angle = Math.atan2(yJ - y, xJ - x);
                         const arrowSize = 10;
 

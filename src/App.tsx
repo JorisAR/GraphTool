@@ -20,25 +20,9 @@ const App: React.FC = () => {
     ];
 
     const [graph, setGraph] = useState(Graph.fromNodesAndLinks(initialNodes, initialLinks));
-    const [graphString, setGraphString] = useState(graph.toString());
 
-    const handleUpdateGraph = (nodes: number[], links: [number, number][]) => {
-        const newGraph = Graph.fromNodesAndLinks(nodes, links);
-        setGraph(newGraph);
-        setGraphString(newGraph.toString());
-    };
-
-    const handleUpdateGraphString = (newGraphString: string, isDirected : boolean) => {
-        setGraphString(newGraphString);
-
-        const lines = newGraphString.split('\n').map(line => line.trim()).filter(line => line);
-        const nodes = lines.filter(line => !line.includes(',') &&  !isNaN(Number(line))).map(Number);
-        const links = lines.filter(line => line.includes(',')).map(line => {
-            const [a, b] = line.split(',').map(Number);
-            return [a, b] as [number, number];
-        });
-
-        setGraph(Graph.fromNodesAndLinks(nodes, links, isDirected));
+    const handleUpdateGraph = (graph: Graph) => {
+        setGraph(graph);
     };
 
     return (
@@ -53,8 +37,8 @@ const App: React.FC = () => {
                     <GraphVisualiserComponent graph={graph} />
                 </div>
                 <div style={{ height: '50%' }}>
-                    <GraphInputComponent graphString={graphString} onUpdateGraphString={handleUpdateGraphString} />
-                    <GraphMatrixComponent graph={graph} onUpdateGraphString={handleUpdateGraphString} />
+                    <GraphInputComponent graph={graph} onUpdateGraph={handleUpdateGraph} />
+                    <GraphMatrixComponent graph={graph} onUpdateGraph={handleUpdateGraph} />
                 </div>
             </div>
             <div style={{ width: '50%', padding: '10px' }}>

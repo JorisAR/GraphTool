@@ -9,11 +9,11 @@ interface GraphSpectrumTabProps {
 }
 
 const GraphSpectrumTab: React.FC<GraphSpectrumTabProps> = ({ graph }) => {
-    const { X, Diag } = graph.getSpectralDecomposition();
+    const { vectors, values } = graph.getSpectralDecomposition();
 
 
-    const XString = `\\begin{bmatrix} ${(X.toArray() as number[][]).map(row => row.join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
-    const DiagString = `\\begin{bmatrix} ${(Diag.toArray() as number[][]).map(row => row.join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
+    const XString = `\\begin{bmatrix} ${(vectors.toArray() as number[][]).map(row => row.join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
+    const DiagString = `\\begin{bmatrix} ${(values.toArray() as number[][]).map(row => row.join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
 
     return (
         <CollapsibleTab title="Spectrum Matrices">
