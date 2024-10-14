@@ -1,5 +1,6 @@
 import p5 from 'p5';
 import Graph from './Graph';
+import graph from "./Graph";
 
 class GraphVisualiser {
     public p5Instance: p5;
@@ -72,22 +73,32 @@ class GraphVisualiser {
         const damping = 0.9; // Damping factor to slow down movements
         const adjacencyMatrix = this.graph.getAdjacencyMatrix();
         const size = adjacencyMatrix.size()[0];
-        const desiredDistance = 150;
+        const desiredDistance = 150; // Desired distance between connected nodes
 
         for (let i = 0; i < size; i++) {
             for (let j = i + 1; j < size; j++) {
                 const dx = this.nodesPositions[j].x - this.nodesPositions[i].x;
                 const dy = this.nodesPositions[j].y - this.nodesPositions[i].y;
                 const distance = Math.max(p.dist(this.nodesPositions[i].x, this.nodesPositions[i].y, this.nodesPositions[j].x, this.nodesPositions[j].y), 1);
-                const force = k * (distance - desiredDistance); // Desired distance is 50 pixels
+
+                let force = 0;
+                if (adjacencyMatrix.get([i, j]) !== 0) {
+                    // Nodes are linked, apply attractive force
+                    force = k * (distance - desiredDistance);
+                } else if(distance < 2 * desiredDistance)  {
+                    // Nodes are not linked, apply repulsive force only
+
+                    force = -k * desiredDistance / (distance * 0.1);
+                }
+
                 const fx = (dx / distance) * force;
                 const fy = (dy / distance) * force;
 
-                if(this.draggedNodeIndex !== i) {
+                if (this.draggedNodeIndex !== i) {
                     this.nodesPositions[i].vx += fx;
                     this.nodesPositions[i].vy += fy;
                 }
-                if(this.draggedNodeIndex !== j) {
+                if (this.draggedNodeIndex !== j) {
                     this.nodesPositions[j].vx -= fx;
                     this.nodesPositions[j].vy -= fy;
                 }
@@ -101,6 +112,8 @@ class GraphVisualiser {
             }
         });
     }
+
+
 
     private updatePositions(p: p5) {
         const halfSize = this.nodeSize  * 0.5;
