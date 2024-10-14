@@ -6,6 +6,8 @@ A simple React-based tool for creating, visualizing, and analyzing graphs. This 
 - Displaying and editing adjacency and Laplacian matrices
 - Calculating global and local graph metrics
 
+It is hosted at: https://jorisar.github.io/GraphTool/
+
 ## Features
 
 - **Graph Input**: Enter nodes and links to create a graph.

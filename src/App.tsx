@@ -30,7 +30,7 @@ const App: React.FC = () => {
         setGraphString(newGraphString);
 
         const lines = newGraphString.split('\n').map(line => line.trim()).filter(line => line);
-        const nodes = lines.filter(line => !line.includes(',')).map(Number);
+        const nodes = lines.filter(line => !line.includes(',') &&  !isNaN(Number(line))).map(Number);
         const links = lines.filter(line => line.includes(',')).map(line => {
             const [a, b] = line.split(',').map(Number);
             return [a, b] as [number, number];

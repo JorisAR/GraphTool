@@ -113,6 +113,47 @@ class Graph {
         return triples ? (3 * triangles) / triples : 0;
     }
 
+    public getDiameter(): number {
+        const size = this.adjacencyMatrix.size()[0];
+        const distances = math.clone(this.adjacencyMatrix);
+
+        // Initialize distances
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                if (i !== j && distances.get([i, j]) === 0) {
+                    distances.set([i, j], Infinity);
+                }
+            }
+        }
+
+        // Floyd-Warshall algorithm
+        for (let k = 0; k < size; k++) {
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    const newDist = distances.get([i, k]) + distances.get([k, j]);
+                    if (newDist < distances.get([i, j])) {
+                        distances.set([i, j], newDist);
+                    }
+                }
+            }
+        }
+
+        // Find the longest shortest path
+        let diameter = 0;
+        distances.forEach((value) => {
+            if (value !== Infinity && value > diameter) {
+                diameter = value;
+            }
+        });
+
+        return diameter;
+    }
+
+/*    public getSpectralDecomposition(): { eigenvalues: MathArray, eigenvectors: Matrix } {
+        const {eigenvalues, eigenvectors} = math.eigs(this.adjacencyMatrix);
+        return {eigenvalues, eigenvectors: eigenvectors as Matrix};
+    }*/
+
     public toString(): string {
         const links: [number, number][] = [];
         const nodes = this.nodeList;
