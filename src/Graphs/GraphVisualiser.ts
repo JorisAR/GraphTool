@@ -124,8 +124,6 @@ class GraphVisualiser {
             // Keep nodes within the bounds of the canvas
             node.x = p.constrain(node.x, halfSize, p.width - halfSize);
             node.y = p.constrain(node.y, halfSize, p.height - halfSize);
-
-            console.log(node.x);
         });
 
 
@@ -135,19 +133,37 @@ class GraphVisualiser {
         const adjacencyMatrix = this.graph.getAdjacencyMatrix();
         const size = adjacencyMatrix.size()[0];
         const nodeList = this.graph.getNodeList();
+        const halfSize = this.nodeSize * 0.5;
 
-        // draw lines
         for (let i = 0; i < size; i++) {
-            const {x, y} = this.nodesPositions[i];
+            const { x, y } = this.nodesPositions[i];
             for (let j = 0; j < size; j++) {
                 if (adjacencyMatrix.get([i, j]) !== 0) {
-                    const {x: xJ, y: yJ} = this.nodesPositions[j];
+                    const { x: xJ, y: yJ } = this.nodesPositions[j];
+
+                    // Draw line
                     p.line(x, y, xJ, yJ);
+
+                    // Draw arrowhead for directed edges
+                    if (this.graph.isDirected) {
+                        const angle = Math.atan2(yJ - y, xJ - x);
+                        const arrowSize = 10;
+
+                        const xEnd = xJ - halfSize * Math.cos(angle);
+                        const yEnd = yJ - halfSize * Math.sin(angle);
+
+                        p.push();
+                        p.translate(xEnd, yEnd);
+                        p.rotate(angle);
+                        p.line(0, 0, -arrowSize, arrowSize / 2);
+                        p.line(0, 0, -arrowSize, -arrowSize / 2);
+                        p.pop();
+                    }
                 }
             }
         }
 
-        //draw nodes
+        // Draw nodes
         for (let i = 0; i < size; i++) {
             const { x, y } = this.nodesPositions[i];
             p.fill(0);
@@ -157,6 +173,7 @@ class GraphVisualiser {
             p.text(nodeList[i], x, y);
         }
     }
+
 
     public updateGraph(newGraph: Graph) {
         this.graph = newGraph;

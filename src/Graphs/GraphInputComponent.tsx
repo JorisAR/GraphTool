@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 
 interface GraphInputComponentProps {
     graphString: string;
-    onUpdateGraphString: (graphString: string) => void;
+    onUpdateGraphString: (graphString: string, isDirected: boolean) => void;
 }
 
 const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graphString, onUpdateGraphString }) => {
     const [input, setInput] = useState(graphString);
     const [presets, setPresets] = useState<{ name: string, content: string }[]>([]);
     const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+    const [isDirected, setIsDirected] = useState(false);
 
     useEffect(() => {
         setInput(graphString);
@@ -39,7 +40,7 @@ const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graphString, 
     };
 
     const handleUpdate = () => {
-        onUpdateGraphString(input);
+        onUpdateGraphString(input, isDirected);
     };
 
     const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -47,8 +48,13 @@ const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graphString, 
         if (preset) {
             setSelectedPreset(preset.name);
             setInput(preset.content);
-            onUpdateGraphString(preset.content);
+            onUpdateGraphString(preset.content, isDirected);
         }
+    };
+
+    const handleToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setIsDirected(e.target.checked);
+        onUpdateGraphString(graphString, e.target.checked);
     };
 
     return (
@@ -60,6 +66,15 @@ const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graphString, 
                     <option key={preset.name} value={preset.name}>{preset.name}</option>
                 ))}
             </select>
+            <br/>
+            <label>
+                Directed Graph:
+                <input
+                    type="checkbox"
+                    checked={isDirected}
+                    onChange={handleToggleChange}
+                />
+            </label>
             <br/>
             <button onClick={handleUpdate}>Update Graph</button>
             <br/>

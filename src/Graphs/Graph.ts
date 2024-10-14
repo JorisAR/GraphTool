@@ -1,4 +1,4 @@
-import {create, all, Matrix, MathArray, forEach, MathCollection} from 'mathjs';
+import {all, create, Matrix} from 'mathjs';
 
 const math = create(all);
 
@@ -67,6 +67,16 @@ class Graph {
         const degreeMatrix = math.diag(degrees) as Matrix;
         return math.subtract(degreeMatrix, this.adjacencyMatrix) as Matrix;
     }
+
+    public getComplementGraph(): Matrix {
+        const size = this.adjacencyMatrix.size();
+        const I = math.identity(size[0]);
+        const J = math.matrix(math.ones(size[0], size[1]));
+        const result =  math.matrix(math.subtract(math.subtract(J, I), this.adjacencyMatrix) as Matrix);
+        console.log(`result; ${result}`);
+        return math.matrix(result);
+    }
+
 
     public getNodeList(): number[] {
         return this.nodeList;

@@ -6,7 +6,7 @@ const math = create(all);
 
 interface GraphMatrixComponentProps {
     graph: Graph;
-    onUpdateGraphString: (graphString: string) => void;
+    onUpdateGraphString: (graphString: string, isDirected: boolean) => void;
 }
 
 const GraphMatrixComponent: React.FC<GraphMatrixComponentProps> = ({ graph, onUpdateGraphString }) => {
@@ -41,7 +41,7 @@ const GraphMatrixComponent: React.FC<GraphMatrixComponentProps> = ({ graph, onUp
         newMatrix.push(Array(newNodes.length).fill(0));
         setMatrix(newMatrix);
 
-        onUpdateGraphString(Graph.fromAdjacencyMatrix(math.matrix(newMatrix), newNodes, graph.isDirected).toString());
+        onUpdateGraphString(Graph.fromAdjacencyMatrix(math.matrix(newMatrix), newNodes, graph.isDirected).toString(), graph.isDirected);
     };
 
     const handleRemoveNode = (index: number) => {
@@ -51,7 +51,7 @@ const GraphMatrixComponent: React.FC<GraphMatrixComponentProps> = ({ graph, onUp
         const newMatrix = matrix.filter((_, i) => i !== index).map(row => row.filter((_, j) => j !== index));
         setMatrix(newMatrix);
 
-        onUpdateGraphString(Graph.fromAdjacencyMatrix(math.matrix(newMatrix), newNodes, graph.isDirected).toString());
+        onUpdateGraphString(Graph.fromAdjacencyMatrix(math.matrix(newMatrix), newNodes, graph.isDirected).toString(), graph.isDirected);
     };
 
     const handleUpdate = () => {
@@ -64,12 +64,18 @@ const GraphMatrixComponent: React.FC<GraphMatrixComponentProps> = ({ graph, onUp
             }
         }
         const newGraph = Graph.fromNodesAndLinks(nodes, newLinks, graph.isDirected);
-        onUpdateGraphString(newGraph.toString());
+        onUpdateGraphString(newGraph.toString(), graph.isDirected);
+    };
+
+    const handleComplement = () => {
+        const newGraph = Graph.fromAdjacencyMatrix(graph.getComplementGraph(), nodes, graph.isDirected);
+        onUpdateGraphString(newGraph.toString(), graph.isDirected);
     };
 
     return (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div style={{ width: '25%' }}>
+                <button onClick={handleComplement}>Get Complement Graph</button>
                 <h3>Nodes</h3>
                 <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
                     {nodes.map((node, index) => (
@@ -101,7 +107,7 @@ const GraphMatrixComponent: React.FC<GraphMatrixComponentProps> = ({ graph, onUp
                                         value={cell}
                                         onChange={(e) => handleMatrixChange(e, i, j)}
                                         style={{ width: '40px' }}
-                                        disabled={!graph.isDirected && j < i}
+                                        disabled={!graph.isDirected && j < i || j === i}
                                     />
                                 </td>
                             ))}

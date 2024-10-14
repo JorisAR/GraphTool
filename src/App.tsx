@@ -8,6 +8,7 @@ import GraphMetricsTab from "Graphs/GraphMetricsTab";
 import GraphMatricesTab from "Graphs/GraphMatricesTab";
 import GraphLocalMetricsTab from "Graphs/GraphLocalMetricsTab";
 import GraphSpectrumTab from "Graphs/GraphSpectrumTab";
+import {boolean} from "mathjs";
 
 const App: React.FC = () => {
     const initialNodes = [0, 1, 2, 3];
@@ -27,7 +28,7 @@ const App: React.FC = () => {
         setGraphString(newGraph.toString());
     };
 
-    const handleUpdateGraphString = (newGraphString: string) => {
+    const handleUpdateGraphString = (newGraphString: string, isDirected : boolean) => {
         setGraphString(newGraphString);
 
         const lines = newGraphString.split('\n').map(line => line.trim()).filter(line => line);
@@ -37,12 +38,17 @@ const App: React.FC = () => {
             return [a, b] as [number, number];
         });
 
-        setGraph(Graph.fromNodesAndLinks(nodes, links));
+        setGraph(Graph.fromNodesAndLinks(nodes, links, isDirected));
     };
 
     return (
         <div style={{ display: 'flex', height: '100vh' }}>
             <div style={{ width: '50%', display: 'flex', flexDirection: 'column' }}>
+                <div>
+                    <h1 style={{textAlign: "center"}}>
+                        Graph Visualization Tool
+                    </h1>
+                </div>
                 <div style={{ height: '40%' }}>
                     <GraphVisualiserComponent graph={graph} />
                 </div>
