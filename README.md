@@ -1,46 +1,44 @@
-# Getting Started with Create React App
+# Graph Visualisation Tool
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A simple React-based tool for creating, visualizing, and analyzing graphs. This project includes features for:
+- Creating graphs by specifying nodes and links
+- Visualizing graphs using p5.js
+- Displaying and editing adjacency and Laplacian matrices
+- Calculating global and local graph metrics
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Graph Input**: Enter nodes and links to create a graph.
+- **Graph Visualization**: Visualize the graph using p5.js.
+- **Adjacency Matrix**: View and edit the graph's adjacency matrix.
+- **Laplacian Matrix**: View the graph's Laplacian matrix in LaTeX.
+- **Global Metrics**: Calculate and display metrics like node count, link count, clustering coefficient, and average degree.
+- **Local Metrics**: Analyze metrics for individual nodes.
 
-### `npm start`
+## Getting Started
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Prerequisites
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+- Node.js (>= 12.x)
+- npm (>= 6.x)
 
-### `npm test`
+### Installation
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd graph-visualisation-tool
+   ```
 
-### `npm run build`
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Running the Application
+To start the development server:
+   ```bash
+   npm start
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Open your browser and navigate to http://localhost:3000 to see the application in action.
