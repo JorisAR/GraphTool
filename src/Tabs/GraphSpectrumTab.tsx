@@ -1,6 +1,6 @@
 import React from 'react';
-import Graph from './Graph';
-import CollapsibleTab from './CollapsibleTab';
+import Graph from 'Graphs/Graph';
+import CollapsibleTab from 'Tabs/CollapsibleTab';
 import { InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 

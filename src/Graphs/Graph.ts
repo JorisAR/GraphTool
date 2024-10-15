@@ -214,6 +214,11 @@ class Graph {
         return count;
     }
 
+    public getAllDegrees(): number[] {
+        return this.nodeList.map(node => this.getDegree(node));
+    }
+
+
     public getDegree(selectedNode: number): number {
         const nodeIndex = this.nodeAliasMap.get(selectedNode);
         if (nodeIndex !== undefined) {

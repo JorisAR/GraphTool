@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import Graph from './Graphs/Graph';
 import GraphInputComponent from './Graphs/GraphInputComponent';
 import GraphVisualiserComponent from './Graphs/GraphVisualiserComponent';
-import GraphMetricsTab from './Graphs/GraphMetricsTab';
-import GraphMatricesTab from './Graphs/GraphMatricesTab';
-import GraphLocalMetricsTab from './Graphs/GraphLocalMetricsTab';
-import GraphSpectrumTab from './Graphs/GraphSpectrumTab';
-import { ResizableBox } from 'react-resizable';
-import 'react-resizable/css/styles.css';
+import GraphMetricsTab from 'Tabs/GraphMetricsTab';
+import GraphMatricesTab from 'Tabs/GraphMatricesTab';
+import GraphLocalMetricsTab from 'Tabs/GraphLocalMetricsTab';
+import GraphSpectrumTab from 'Tabs/GraphSpectrumTab';
+import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
+// import 'react-resizable-panels/styles.css';
 import useWindowDimensions from "Hooks/useWindowDimensions";
+import DegreeHistogramTab from "Tabs/DegreeHistogramTab";
 
 const App: React.FC = () => {
     const initialNodes = [0, 1, 2, 3];
@@ -24,11 +25,8 @@ const App: React.FC = () => {
     };
     const { width, height } = useWindowDimensions();
 
-    const [topWidth, setTopWidth] = useState(0.5 * width); // Initialize using pixels
-    const [topHeight, setTopHeight] = useState(0.5 * height); // Initialize using pixels
-
     return (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <div style={{
                 backgroundColor: '#333',
                 color: '#fff',
@@ -39,41 +37,34 @@ const App: React.FC = () => {
                 Graph Visualization Tool
             </div>
             <div style={{ display: 'flex', height: 'calc(100vh - 40px)' }}>
-                <ResizableBox
-                    width={topWidth}
-                    height={Infinity}
-                    axis="x"
-                    minConstraints={[100, Infinity]}
-                    maxConstraints={[width - 100, Infinity]}
-                    onResize={(e, data) => setTopWidth(data.size.width)}
-                    resizeHandles={['e']}>
-                    <div style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        overflow: 'hidden'
-                    }}>
-                        <ResizableBox
-                            width={Infinity}
-                            height={topHeight}
-                            axis="y"
-                            minConstraints={[Infinity, 100]}
-                            maxConstraints={[Infinity, height - 100]}
-                            onResize={(e, data) => setTopHeight(data.size.height)}
-                            resizeHandles={['s']}
-                        ><GraphVisualiserComponent graph={graph} />
-                        </ResizableBox>
-                        <GraphInputComponent graph={graph} onUpdateGraph={handleUpdateGraph} />
-                    </div>
-                </ResizableBox>
-                <div style={{ flex: 1, padding: '10px', overflowY: 'scroll' }}>
-                    <GraphMatricesTab graph={graph} />
-                    <GraphMetricsTab graph={graph} />
-                    <GraphLocalMetricsTab graph={graph} />
-                    <GraphSpectrumTab graph={graph} />
-                    {/* Add more tabs here */}
-                </div>
+                <PanelGroup direction="horizontal">
+                    <Panel defaultSize={65} minSize={10}>
+                        <PanelGroup direction="vertical">
+                            <Panel defaultSize={50} minSize={10}>
+                                <GraphVisualiserComponent graph={graph} />
+                            </Panel>
+                            <PanelResizeHandle />
+                            <Panel minSize={10}>
+                                <div style={{ height: '5px', width: '100%', backgroundColor: '#333' }}></div>
+                                <GraphInputComponent graph={graph} onUpdateGraph={handleUpdateGraph} />
+                            </Panel>
+                        </PanelGroup>
+                    </Panel>
+                    <PanelResizeHandle />
+                    <Panel minSize={10}>
+                        <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+                            <div style={{ width: '5px', height: '100%', backgroundColor: '#333' }}></div>
+                            <div style={{ flex: 1, padding: '10px', overflowY: 'auto', height: '100%' }}>
+                                <GraphMatricesTab graph={graph} />
+                                <GraphMetricsTab graph={graph} />
+                                <GraphLocalMetricsTab graph={graph} />
+                                <GraphSpectrumTab graph={graph} />
+                                <DegreeHistogramTab graph={graph} />
+                                {/* Add more tabs here */}
+                            </div>
+                        </div>
+                    </Panel>
+                </PanelGroup>
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Graph from './Graph';
-import CollapsibleTab from './CollapsibleTab';
+import Graph from 'Graphs/Graph';
+import CollapsibleTab from 'Tabs/CollapsibleTab';
 
 interface GraphLocalMetricsTabProps {
     graph: Graph;

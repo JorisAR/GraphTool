@@ -1,5 +1,5 @@
 import React, { useState, ReactNode } from 'react';
-import Graph from './Graph';
+import Graph from 'Graphs/Graph';
 
 interface CollapsibleTabProps {
     title: string;
@@ -29,8 +29,14 @@ const CollapsibleTab: React.FC<CollapsibleTabProps> = ({ title, children }) => {
                 {title} {isOpen ? '▼' : '▲'}
             </button>
             {isOpen && (
-                <div style={{ padding: '10px', border: '1px solid #ccc', borderTop: 'none', borderRadius: '0 0 4px 4px' }}>
-                    {children}
+                <div style={{
+                    padding: '10px',
+                    border: '1px solid #ccc',
+                    borderTop: 'none',
+                    borderRadius: '0 0 4px 4px',
+                    overflowX: 'auto'
+                }}>
+                {children}
                 </div>
             )}
         </div>

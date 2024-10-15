@@ -86,7 +86,7 @@ const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graph, onUpda
     };
 
     return (
-        <div style={{ padding: '20px', backgroundColor: '#f9f9f9', border: '1px solid #ccc' }}>
+        <div style={{ padding: '20px', backgroundColor: '#f9f9f9', border: '1px solid #ccc', height: '100%' }}>
             <h3>Graph Controls</h3>
             <div style={{ marginBottom: '15px' }}>
                 <label style={{ marginRight: '10px', fontWeight: 'bold' }}>Select a Preset:</label>
