@@ -12,8 +12,8 @@ const GraphSpectrumTab: React.FC<GraphSpectrumTabProps> = ({ graph }) => {
     const { vectors, values } = graph.getSpectralDecomposition();
 
 
-    const XString = `\\begin{bmatrix} ${(vectors.toArray() as number[][]).map(row => row.join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
-    const DiagString = `\\begin{bmatrix} ${(values.toArray() as number[][]).map(row => row.join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
+    const XString = Graph.LatexMatrix(vectors, 3);
+    const DiagString = Graph.LatexMatrix(values, 3);
 
     return (
         <CollapsibleTab title="Spectrum Matrices">

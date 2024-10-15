@@ -7,12 +7,14 @@ class Graph {
     private nodeAliasMap: Map<number, number>;
     private nodeList: number[];
     private isDirected: boolean;
+    private weights: number[];
 
-    constructor(matrix?: Matrix, nodeList?: number[], isDirected = false) {
-        this.adjacencyMatrix = matrix || math.matrix();
+    constructor(matrix: Matrix, nodeList?: number[], isDirected = false, weights?: number[]) {
+        this.adjacencyMatrix = matrix;
         this.nodeAliasMap = new Map();
         this.nodeList = nodeList || [];
         this.isDirected = isDirected;
+        this.weights = weights || [];
 
         if (nodeList) {
             nodeList.forEach((node, index) => {
@@ -21,17 +23,6 @@ class Graph {
         }
 
         if(!isDirected) this.makeSymmetric();
-    }
-
-    public getIsDirected() : boolean {
-        return this.isDirected;
-    }
-
-    public setIsDirected(value: boolean) {
-        if(!value) {
-            this.makeSymmetric();
-        }
-        this.isDirected = value;
     }
 
     public makeSymmetric() {
@@ -43,6 +34,40 @@ class Graph {
         }
     }
 
+    // ----------------------------------------- Static Functions -----------------------------------------
+
+    public static LatexMatrix(matrix : Matrix, round?:number) : string {
+        if(round) {
+            matrix = math.round(matrix, round);
+        }
+        return `\\begin{bmatrix} ${(matrix.toArray() as number[][]).map(row => row.join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
+    }
+
+    public static stringToGraph(newGraphString: string, isDirected: boolean): Graph {
+        const lines = newGraphString.split('\n').map(line => line.trim()).filter(line => line);
+        // @ts-ignore
+        const nodes = [...new Set(lines.filter(line => !line.includes(',') && !isNaN(Number(line))).map(Number))];
+        const links: [number, number][] = [];
+        const weights: (number | undefined)[] = [];
+
+        lines.filter(line => line.includes(',')).forEach(line => {
+            const parts = line.split(':');
+            const [a, b] = parts[0].split(',').map(Number);
+
+            if(nodes.indexOf(a) > -1 && nodes.indexOf(b) > -1) {
+                links.push([a, b]);
+                weights.push(parts[1] ? parseFloat(parts[1]) : undefined);
+            }
+        });
+
+        const hasWeights = weights.some(w => w !== undefined);
+        const finalWeights: number[] = hasWeights ? weights.map(w => (w === undefined ? 1 : w)) : [];
+
+        const result = Graph.fromNodesAndLinks(nodes, links, isDirected, finalWeights);
+        result.makeSymmetric();
+        return result;
+    }
+
     private static createAliasMap(nodes: number[]): Map<number, number> {
         const aliasMap = new Map();
         nodes.forEach((node, index) => {
@@ -51,7 +76,7 @@ class Graph {
         return aliasMap;
     }
 
-    public static fromNodesAndLinks(nodes: number[], links: [number, number][], isDirected = false): Graph {
+    public static fromNodesAndLinks(nodes: number[], links: [number, number][], isDirected = false, weights?: number[]): Graph {
         const aliasMap = Graph.createAliasMap(nodes);
         const size = nodes.length;
         const adjacencyMatrix = math.matrix(math.zeros([size, size]));
@@ -67,27 +92,94 @@ class Graph {
             }
         });
 
-        return new Graph(adjacencyMatrix as Matrix, nodes, isDirected);
+        return new Graph(adjacencyMatrix as Matrix, nodes, isDirected, weights);
     }
 
-    public static fromAdjacencyMatrix(matrix: Matrix, nodeList: number[], isDirected = false): Graph {
-        return new Graph(matrix, nodeList, isDirected);
+    public static fromAdjacencyMatrix(matrix: Matrix, nodeList: number[], isDirected = false, weights?: number[]): Graph {
+        return new Graph(matrix, nodeList, isDirected, weights);
+    }
+
+    // ----------------------------------------- GETTERS / SETTERS -----------------------------------------
+
+    public getIsDirected() : boolean {
+        return this.isDirected;
+    }
+
+    public getIsWeighted() : boolean {
+        return this.weights.length === this.getLinkCount();
+    }
+
+    public setIsDirected(value: boolean) {
+        if(!value) {
+            this.makeSymmetric();
+        }
+        this.isDirected = value;
     }
 
     public getAdjacencyMatrix(): Matrix {
         return this.adjacencyMatrix;
     }
 
-    public getLaplacianMatrix(): Matrix {
+    public getNodeList(): number[] {
+        return this.nodeList;
+    }
+
+    public getEdgeWeightList(): number[] {
+        return this.weights;
+    }
+
+    public getNodeCount(): number {
+        return this.nodeList.length;
+    }
+
+    // ----------------------------------------- Compute Matrices -----------------------------------------
+
+    public getLinks(): [number, number][] {
+        const links: [number, number][] = [];
+        this.adjacencyMatrix.forEach((value, [i, j]) => {
+            if (value !== 0 && (this.isDirected || i <= j)) {
+                links.push([i, j]);
+            }
+        });
+        return links;
+    }
+
+    public getIncidenceMatrix(): Matrix {
+        const size = this.adjacencyMatrix.size()[0];
+        const links = this.getLinks();
+        const incidenceMatrix = math.matrix(math.zeros(size, links.length));
+
+        links.forEach(([i, j], index) => {
+            incidenceMatrix.set([i, index], 1);
+            incidenceMatrix.set([j, index], this.isDirected ? -1 : 1);
+        });
+
+        return incidenceMatrix as Matrix;
+    }
+
+    public getPseudoInverse(weighted: boolean = false): Matrix {
+        const laplacian = this.getLaplacianMatrix(weighted);
+        if(math.det(laplacian)) //TODO PROPER PSEUDOINVERSE
+            return laplacian;
+        const pseudoInverse = math.pinv(laplacian);
+        return pseudoInverse as Matrix;
+    }
+
+    public getDegreeMatrix(weighted: boolean = false): Matrix {
         const size = this.adjacencyMatrix.size()[0];
         const degrees = Array(size).fill(0);
 
         this.adjacencyMatrix.forEach((value, index) => {
-            degrees[index[0]] += value;
+            degrees[index[0]] += value * (weighted ? (this.weights[index[0]] || 1) : 1);
         });
 
-        const degreeMatrix = math.diag(degrees) as Matrix;
-        return math.subtract(degreeMatrix, this.adjacencyMatrix) as Matrix;
+        return math.matrix(math.diag(degrees));
+    }
+
+    public getLaplacianMatrix(weighted: boolean = false): Matrix {
+        const degreeMatrix = this.getDegreeMatrix(weighted);
+        const weightedAdjacencyMatrix = this.adjacencyMatrix.map((value, index) => value * (weighted ? (this.weights[index[0]] || 1) : 1));
+        return math.subtract(degreeMatrix, weightedAdjacencyMatrix) as Matrix;
     }
 
     public getComplementGraph(): Matrix {
@@ -99,21 +191,27 @@ class Graph {
         return math.matrix(result);
     }
 
+    public getWeightMatrix(): Matrix {
+        const links = this.getLinks();
+        const size = links.length;
+        const weightMatrix = math.matrix(math.zeros(size, size));
 
-    public getNodeList(): number[] {
-        return this.nodeList;
+        links.forEach((_, index) => {
+            weightMatrix.set([index, index], this.weights[index] || 1);
+        });
+        return weightMatrix as Matrix;
     }
 
-    public getNodeCount(): number {
-        return this.nodeList.length;
-    }
-
+    private linkCount = -1;
     public getLinkCount(): number {
+        if(this.linkCount >= 0) return this.linkCount;
         let count = 0;
         this.adjacencyMatrix.forEach(value => {
             if (value !== 0) count++;
         });
-        return this.isDirected ? count : count / 2;
+        count = this.isDirected ? count : count / 2
+        this.linkCount = count;
+        return count;
     }
 
     public getDegree(selectedNode: number): number {
@@ -196,31 +294,30 @@ class Graph {
             eigenvectors = eigenvectors.sort((a, b) => (b.value as number) - (a.value as number));
             const eigenVectors = eigenvectors.map((obj: any) => obj.vector);
             const Values = eigenvectors.map((obj: any) => obj.value);
-            const X = math.round(math.transpose(math.matrix(eigenVectors)), 3) as Matrix;
-            const Diag = math.round(math.matrix(math.diag(Values)), 3) as Matrix;
+            const X = math.transpose(math.matrix(eigenVectors)) as Matrix;
+            const Diag = math.matrix(math.diag(Values)) as Matrix;
             return { vectors: X, values: Diag };
         } catch (error) {
             console.error("Eigenvalues failed to converge:", error);
             const size = this.adjacencyMatrix.size();
             const I = math.identity(size[0]) as Matrix;
-            const J = math.matrix(math.zeros(size[0], size[1]));
-            return { vectors: I, values: J };
+            const Z = math.matrix(math.zeros(size[0], size[1]));
+            return { vectors: I, values: Z };
         }
     }
 
-
-
+    /// converts to user readable format!
     public toString(): string {
-        const links: [number, number][] = [];
+        const links: [number, number][] = this.getLinks();
         const nodes = this.nodeList;
+        const weights = this.weights;
 
-        this.adjacencyMatrix.forEach((value, [i, j]) => {
-            if (value !== 0 && (this.isDirected || i <= j)) {
-                links.push([nodes[i], nodes[j]]);
-            }
-        });
+        // Map links to their string representation with weights if present
+        const linkStr = links.map((link, index) => {
+            const weight = this.getIsWeighted() ? `:${weights[index]}` : '';
+            return `${nodes[link[0]]},${nodes[link[1]]}${weight}`;
+        }).join('\n');
 
-        const linkStr = links.map(([i, j]) => `${i},${j}`).join('\n');
         return `${nodes.join('\n')}\n${linkStr}`;
     }
 }

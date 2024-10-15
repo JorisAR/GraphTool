@@ -23,7 +23,7 @@ class GraphVisualiser {
             };
 
             p.draw = () => {
-                p.background(255);
+                p.background(225);
                 this.applyForces(p);
                 this.updatePositions(p);
                 this.drawGraph(p);
@@ -82,7 +82,7 @@ class GraphVisualiser {
                 const distance = Math.max(p.dist(this.nodesPositions[i].x, this.nodesPositions[i].y, this.nodesPositions[j].x, this.nodesPositions[j].y), 1);
 
                 let force = 0;
-                if (adjacencyMatrix.get([i, j]) !== 0) {
+                if (adjacencyMatrix.get([i, j]) !== 0 || adjacencyMatrix.get([j, i]) !== 0) {
                     // Nodes are linked, apply attractive force
                     force = k * (distance - desiredDistance);
                 } else if(distance < desiredDisconnectedDistance)  {
@@ -130,40 +130,76 @@ class GraphVisualiser {
     }
 
     private drawGraph(p: p5) {
-        const adjacencyMatrix = this.graph.getAdjacencyMatrix();
-        const size = adjacencyMatrix.size()[0];
+        const links = this.graph.getLinks();
+        const size = this.graph.getNodeList().length;
         const nodeList = this.graph.getNodeList();
-        const halfSize = this.nodeSize * 0.5;
+        const weights = this.graph.getEdgeWeightList();
 
-        for (let i = 0; i < size; i++) {
-            const { x, y } = this.nodesPositions[i];
-            for (let j = 0; j < size; j++) {
-                if (adjacencyMatrix.get([i, j]) !== 0) {
-                    const { x: xJ, y: yJ } = this.nodesPositions[j];
+        links.forEach(([i, j], index) => {
+            const { x: x1, y: y1 } = this.nodesPositions[i];
+            const { x: x2, y: y2 } = this.nodesPositions[j];
 
-                    // Draw line
-                    p.line(x, y, xJ, yJ);
+            // Check for bidirectional link
+            const reverseLinkExists = links.some(([a, b]) => a === j && b === i);
 
-                    // Draw arrowhead for directed edges
-                    if (this.graph.getIsDirected()) {
-                        const angle = Math.atan2(yJ - y, xJ - x);
-                        const arrowSize = 10;
-
-                        const xEnd = xJ - halfSize * Math.cos(angle);
-                        const yEnd = yJ - halfSize * Math.sin(angle);
-
-                        p.push();
-                        p.translate(xEnd, yEnd);
-                        p.rotate(angle);
-                        p.line(0, 0, -arrowSize, arrowSize / 2);
-                        p.line(0, 0, -arrowSize, -arrowSize / 2);
-                        p.pop();
-                    }
-                }
+            if (reverseLinkExists && this.graph.getIsDirected()) {
+                this.drawArc(p, x1, y1, x2, y2, weights[index] | 1);
+            } else {
+                this.drawLine(p, x1, y1, x2, y2, weights[index] | 1);
             }
+        });
+
+        this.drawNodes(p, size, nodeList);
+    }
+
+    private drawLine(p: p5, x1: number, y1: number, x2: number, y2: number, weight: number) {
+        p.fill(0);
+        p.line(x1, y1, x2, y2);
+        if(this.graph.getIsWeighted()) {
+            const midX = (x1 + x2) / 2;
+            const midY = (y1 + y2) / 2;
+            p.textAlign(p.CENTER, p.BOTTOM);
+            p.text(weight.toString(), midX, midY - 5);
         }
 
-        // Draw nodes
+
+        if (this.graph.getIsDirected()) {
+            this.drawArrowhead(p, x1, y1, x2, y2, this.nodeSize * 0.5);
+        }
+    }
+
+    private drawArc(p: p5, x1: number, y1: number, x2: number, y2: number, weight: number) {
+        const midX = (x1 + x2) / 2;
+        const midY = (y1 + y2) / 2;
+        const controlX = midX + 30 * Math.sin(Math.atan2(y2 - y1, x2 - x1));
+        const controlY = midY - 30 * Math.cos(Math.atan2(y2 - y1, x2 - x1));
+        p.noFill();
+        p.beginShape();
+        p.vertex(x1, y1);
+        p.quadraticVertex(controlX, controlY, x2, y2);
+        p.endShape();
+        if(this.graph.getIsWeighted()) {
+            p.fill(0);
+            p.textAlign(p.CENTER, p.BOTTOM);
+            p.text(weight.toString(), controlX, controlY - 5);
+        }
+        this.drawArrowhead(p, controlX, controlY, x2, y2, this.nodeSize * 0.5);
+    }
+
+    private drawArrowhead(p: p5, x1: number, y1: number, x2: number, y2: number, halfSize: number) {
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const arrowSize = 10;
+        const xEnd = x2 - halfSize * Math.cos(angle);
+        const yEnd = y2 - halfSize * Math.sin(angle);
+        p.push();
+        p.translate(xEnd, yEnd);
+        p.rotate(angle);
+        p.line(0, 0, -arrowSize, arrowSize / 2);
+        p.line(0, 0, -arrowSize, -arrowSize / 2);
+        p.pop();
+    }
+
+    private drawNodes(p: p5, size: number, nodeList: number[]) {
         for (let i = 0; i < size; i++) {
             const { x, y } = this.nodesPositions[i];
             p.fill(0);
@@ -173,6 +209,10 @@ class GraphVisualiser {
             p.text(nodeList[i], x, y);
         }
     }
+
+
+
+
 
 
     public updateGraph(newGraph: Graph) {
