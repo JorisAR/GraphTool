@@ -7,9 +7,10 @@ import GraphMatricesTab from 'Tabs/GraphMatricesTab';
 import GraphLocalMetricsTab from 'Tabs/GraphLocalMetricsTab';
 import GraphSpectrumTab from 'Tabs/GraphSpectrumTab';
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
-// import 'react-resizable-panels/styles.css';
 import useWindowDimensions from "Hooks/useWindowDimensions";
 import DegreeHistogramTab from "Tabs/DegreeHistogramTab";
+import GraphGeneratorPopup from './GraphGenerator/GraphGeneratorPopup'; // Import the new component
+import './App.css'; // Import CSS for styling the popup
 
 const App: React.FC = () => {
     const initialNodes = [0, 1, 2, 3];
@@ -24,6 +25,7 @@ const App: React.FC = () => {
         setGraph(graph);
     };
     const { width, height } = useWindowDimensions();
+
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>

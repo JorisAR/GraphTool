@@ -1,6 +1,7 @@
 import {create, all, Matrix} from 'mathjs';
 import React, { useState, useEffect } from 'react';
 import Graph from './Graph';
+import GraphGeneratorPopup from "GraphGenerator/GraphGeneratorPopup";
 const math = create(all);
 
 interface GraphInputComponentProps {
@@ -14,6 +15,7 @@ const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graph, onUpda
     const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
     const [isDirected, setIsDirected] = useState(graph.getIsDirected());
     const [matrix, setMatrix] = useState<Matrix>(graph.getAdjacencyMatrix());
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
 
     useEffect(() => {
         setInput(graph.toString());
@@ -57,8 +59,8 @@ const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graph, onUpda
         }
     };
 
-    const handleToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const directed = e.target.checked;
+    const handleToggleDirected = () => {
+        const directed = !graph.getIsDirected();
         setIsDirected(directed);
         const newGraph = Graph.fromAdjacencyMatrix(graph.getAdjacencyMatrix(), graph.getNodeList(), directed);
         onUpdateGraph(newGraph);
@@ -85,43 +87,49 @@ const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graph, onUpda
         onUpdateGraph(Graph.fromAdjacencyMatrix(math.matrix(newMatrix), graph.getNodeList(), graph.getIsDirected()));
     };
 
+    const handleOpenPopup = () => {
+        setIsPopupOpen(true);
+    };
+
+    const handleClosePopup = () => {
+        setIsPopupOpen(false);
+    };
+
     return (
-        <div style={{ padding: '20px', backgroundColor: '#f9f9f9', border: '1px solid #ccc', height: '100%' }}>
-            <h3>Graph Controls</h3>
-            <div style={{ marginBottom: '15px' }}>
-                <label style={{ marginRight: '10px', fontWeight: 'bold' }}>Select a Preset:</label>
-                <select onChange={handlePresetChange} value={selectedPreset || ''} style={{ padding: '5px', borderRadius: '5px', border: '1px solid #ccc' }}>
-                    <option value="" disabled>Select a preset</option>
-                    {presets.map(preset => (
-                        <option key={preset.name} value={preset.name}>{preset.name}</option>
-                    ))}
-                </select>
-            </div>
-            <div style={{ marginBottom: '15px' }}>
-                <label style={{ marginRight: '10px', fontWeight: 'bold' }}>Directed Graph:</label>
-                <input
-                    type="checkbox"
-                    checked={isDirected}
-                    onChange={handleToggleChange}
-                    style={{ transform: 'scale(1.5)', marginLeft: '10px' }}
-                />
-            </div>
-            <div style={{ marginBottom: '15px', display: 'flex', gap: '10px' }}>
-                <button onClick={handleToggleWeights} style={{ padding: '10px 20px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#ddd' }}>
-                    {graph.getIsWeighted() ? "Remove Weights" : "Initialize Weights"}
-                </button>
-                <button onClick={handleComplement} style={{ padding: '10px 20px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#ddd' }}>
-                    Get Complement Graph
-                </button>
-            </div>
-            <button onClick={handleUpdate} style={{ padding: '10px 20px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#ddd', marginBottom: '20px' }}>
-                Update Graph
-            </button>
+        <div style={{ padding: '20px', backgroundColor: '#f9f9f9', border: '1px solid #ccc', height: '100%', overflow:'scroll' }}>
+
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
-                <div style={{ width: '40%' }}>
-                    <h3>Input</h3>
-                    <i>Format: i | i,j(:w)<br />i & j are numeric node ids, and w is an edge weight</i>
-                    <textarea rows={10} cols={30} value={input} onChange={handleChange} style={{ width: '100%', borderRadius: '5px', border: '1px solid #ccc', marginTop: '10px' }} />
+                <div style={{ width: '20%' }}>
+                    <i>Format: i | i,j(:w)<br />i & j are numeric node ids, and w is an edge weight</i><br/>
+                    <button onClick={handleUpdate} style={{ padding: '2px 2px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#ddd', marginBottom: '00px', width: '100%' }}>
+                        Update Graph
+                    </button><br/>
+                    <textarea rows={10} cols={30} value={input} onChange={handleChange} style={{ resize: 'vertical', width: '100%', height: '100%', borderRadius: '5px', border: '1px solid #ccc', marginTop: '00px' }} />
+                </div>
+                <div style={{ width: '20%' }}>
+                    <div style={{ marginBottom: '-15px', width: '100%', padding: '10px 00px', borderRadius: '5px', textAlign: 'center' }}>
+                        <h3> Graph Settings</h3>
+                    </div>
+                    <select onChange={handlePresetChange} value={selectedPreset || ''} style={{ marginBottom: '5px', width: '100%', padding: '5px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#555', color:'#fff' }}>
+                        <option value="" disabled>Select a preset</option>
+                        {presets.map(preset => (
+                            <option key={preset.name} value={preset.name}>{preset.name}</option>
+                        ))}
+                    </select>
+                    <br/>
+
+                    <button onClick={handleOpenPopup} style={{ marginBottom: '5px', width: '100%', padding: '10px 20px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#555', color:'#fff' }}>Open Generator</button>
+                    {isPopupOpen && <GraphGeneratorPopup onClose={handleClosePopup} onUpdateGraph={onUpdateGraph} />}
+
+                    <button onClick={handleToggleDirected} style={{ marginBottom: '5px', width: '100%', padding: '10px 20px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#ddd' }}>
+                        {graph.getIsDirected() ? "Make Undirected" : "Make Directed"}
+                    </button><br/>
+                    <button onClick={handleToggleWeights} style={{ marginBottom: '5px', width: '100%', padding: '10px 20px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#ddd' }}>
+                        {graph.getIsWeighted() ? "Remove Weights" : "Initialize Weights"}
+                    </button><br/>
+                    <button onClick={handleComplement} style={{ marginBottom: '5px', width: '100%', padding: '10px 20px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#ddd' }}>
+                        Get Complement Graph
+                    </button>
                 </div>
                 <div style={{ width: '55%' }}>
                     <h3>Adjacency Matrix</h3>

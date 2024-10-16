@@ -27,9 +27,9 @@ class Graph {
 
     public makeSymmetric() {
         const size = this.adjacencyMatrix.size()[0];
-        for(let i = 1; i < size; i++) {
-            for(let j = 0; j < i; j++) {
-                this.adjacencyMatrix.set([i,j], this.adjacencyMatrix.get([j,i]));
+        for(let i = 0; i < size; i++) {
+            for(let j = 0; j < size; j++) {
+                this.adjacencyMatrix.set([i,j], math.max(this.adjacencyMatrix.get([j,i]), this.adjacencyMatrix.get([i,j])));
             }
         }
     }
@@ -159,22 +159,39 @@ class Graph {
 
     public getPseudoInverse(weighted: boolean = false): Matrix {
         const laplacian = this.getLaplacianMatrix(weighted);
-        if(math.det(laplacian)) //TODO PROPER PSEUDOINVERSE
-            return laplacian;
-        const pseudoInverse = math.pinv(laplacian);
-        return pseudoInverse as Matrix;
+        try {
+            const pseudoInverse = math.pinv(laplacian);
+            return pseudoInverse as Matrix;
+        } catch (error) {
+            console.error("Error calculating pseudoinverse: ", error);
+            // Handle gracefully: Return a zero matrix of the same size as a fallback
+            return math.matrix(math.zeros(laplacian.size())) as Matrix;
+        }
     }
+
 
     public getDegreeMatrix(weighted: boolean = false): Matrix {
         const size = this.adjacencyMatrix.size()[0];
         const degrees = Array(size).fill(0);
+        const seenEdges = new Set<string>();
 
         this.adjacencyMatrix.forEach((value, index) => {
-            degrees[index[0]] += value * (weighted ? (this.weights[index[0]] || 1) : 1);
+            if (value !== 0) {
+                const i = index[0];
+                const j = index[1];
+                const edge = i < j ? `${i},${j}` : `${j},${i}`; // Ensure undirected edges are counted once
+
+                if (!seenEdges.has(edge)) {
+                    degrees[i] += value * (weighted ? (this.weights[j] || 1) : 1);
+                    degrees[j] += value * (weighted ? (this.weights[i] || 1) : 1);
+                    seenEdges.add(edge);
+                }
+            }
         });
 
         return math.matrix(math.diag(degrees));
     }
+
 
     public getLaplacianMatrix(weighted: boolean = false): Matrix {
         const degreeMatrix = this.getDegreeMatrix(weighted);
