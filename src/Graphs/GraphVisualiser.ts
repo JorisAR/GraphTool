@@ -143,9 +143,9 @@ class GraphVisualiser {
             const reverseLinkExists = links.some(([a, b]) => a === j && b === i);
 
             if (reverseLinkExists && this.graph.getIsDirected()) {
-                this.drawArc(p, x1, y1, x2, y2, weights[index] | 1);
+                this.drawArc(p, x1, y1, x2, y2, weights[index] || 1);
             } else {
-                this.drawLine(p, x1, y1, x2, y2, weights[index] | 1);
+                this.drawLine(p, x1, y1, x2, y2, weights[index] || 1);
             }
         });
 

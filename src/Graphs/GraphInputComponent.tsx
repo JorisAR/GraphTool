@@ -110,7 +110,7 @@ const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graph, onUpda
                     <div style={{ marginBottom: '-15px', width: '100%', padding: '10px 00px', borderRadius: '5px', textAlign: 'center' }}>
                         <h3> Graph Settings</h3>
                     </div>
-                    <select onChange={handlePresetChange} value={selectedPreset || ''} style={{ marginBottom: '5px', width: '100%', padding: '5px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#555', color:'#fff' }}>
+                    <select onChange={handlePresetChange} value={''} style={{ marginBottom: '5px', width: '100%', padding: '5px', borderRadius: '5px', border: '1px solid #ccc', backgroundColor: '#555', color:'#fff' }}>
                         <option value="" disabled>Select a preset</option>
                         {presets.map(preset => (
                             <option key={preset.name} value={preset.name}>{preset.name}</option>
