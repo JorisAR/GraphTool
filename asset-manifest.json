@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/GraphTool/static/css/main.888b60dd.css",
-    "main.js": "/GraphTool/static/js/main.ffc0a075.js",
+    "main.css": "/GraphTool/static/css/main.81278d06.css",
+    "main.js": "/GraphTool/static/js/main.75ebfaec.js",
     "static/js/453.01137182.chunk.js": "/GraphTool/static/js/453.01137182.chunk.js",
     "static/media/KaTeX_AMS-Regular.ttf": "/GraphTool/static/media/KaTeX_AMS-Regular.853be92419a6c3766b9a.ttf",
     "static/media/KaTeX_Main-Regular.ttf": "/GraphTool/static/media/KaTeX_Main-Regular.9eba1d77abcf2aa6e94e.ttf",
@@ -64,12 +64,12 @@
     "static/media/KaTeX_Size3-Regular.woff": "/GraphTool/static/media/KaTeX_Size3-Regular.7947224e8a9914fa332b.woff",
     "static/media/KaTeX_Size3-Regular.woff2": "/GraphTool/static/media/KaTeX_Size3-Regular.e1951519f6f0596f7356.woff2",
     "index.html": "/GraphTool/index.html",
-    "main.888b60dd.css.map": "/GraphTool/static/css/main.888b60dd.css.map",
-    "main.ffc0a075.js.map": "/GraphTool/static/js/main.ffc0a075.js.map",
+    "main.81278d06.css.map": "/GraphTool/static/css/main.81278d06.css.map",
+    "main.75ebfaec.js.map": "/GraphTool/static/js/main.75ebfaec.js.map",
     "453.01137182.chunk.js.map": "/GraphTool/static/js/453.01137182.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.888b60dd.css",
-    "static/js/main.ffc0a075.js"
+    "static/css/main.81278d06.css",
+    "static/js/main.75ebfaec.js"
   ]
 }
