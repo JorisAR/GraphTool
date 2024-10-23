@@ -3,13 +3,13 @@ import {all, create, Matrix} from 'mathjs';
 const math = create(all);
 
 class Graph {
-    private adjacencyMatrix: Matrix;
-    private nodeAliasMap: Map<number, number>;
-    private nodeList: number[];
-    private isDirected: boolean;
-    private weights: number[];
+    private readonly adjacencyMatrix: Matrix;
+    private readonly nodeAliasMap: Map<number, number>;
+    private readonly nodeList: number[];
+    private readonly isDirected: boolean;
+    private readonly weights: number[];
 
-    constructor(matrix: Matrix, nodeList?: number[], isDirected = false, weights?: number[]) {
+    constructor(private readonly matrix: Matrix, nodeList?: number[], isDirected = false, weights?: number[]) {
         this.adjacencyMatrix = matrix;
         this.nodeAliasMap = new Map();
         this.nodeList = nodeList || [];
@@ -109,13 +109,6 @@ class Graph {
         return this.weights.length === this.getLinkCount();
     }
 
-    public setIsDirected(value: boolean) {
-        if(!value) {
-            this.makeSymmetric();
-        }
-        this.isDirected = value;
-    }
-
     public getAdjacencyMatrix(): Matrix {
         return this.adjacencyMatrix;
     }
@@ -158,16 +151,39 @@ class Graph {
     }
 
     public getPseudoInverse(weighted: boolean = false): Matrix {
-        const laplacian = this.getLaplacianMatrix(weighted);
+        const { values, vectors } = this.getSpectralDecomposition();
+        const epsilon = 1e-10; // small value to prevent division by zero
+
         try {
-            const pseudoInverse = math.pinv(laplacian);
+            let pseudoInverse = math.matrix(math.zeros(this.adjacencyMatrix.size()));
+
+            for (let i = 0; i < this.getNodeCount(); i++) {
+                const column = math.column(vectors, i);
+                const eigenvalue = values.get([i, i]);
+                const term = math.multiply(math.multiply(column, math.transpose(column)), 1 / (eigenvalue + epsilon)); // Adjusting for zero eigenvalues
+                pseudoInverse = math.add(pseudoInverse, term);
+            }
+
             return pseudoInverse as Matrix;
         } catch (error) {
             console.error("Error calculating pseudoinverse: ", error);
             // Handle gracefully: Return a zero matrix of the same size as a fallback
-            return math.matrix(math.zeros(laplacian.size())) as Matrix;
+            return math.matrix(math.zeros(this.adjacencyMatrix.size())) as Matrix;
         }
     }
+
+
+    // public getPseudoInverse(weighted: boolean = false): Matrix {
+    //     const laplacian = this.getLaplacianMatrix(weighted);
+    //     try {
+    //         const pseudoInverse = math.pinv(laplacian);
+    //         return pseudoInverse as Matrix;
+    //     } catch (error) {
+    //         console.error("Error calculating pseudoinverse: ", error);
+    //         // Handle gracefully: Return a zero matrix of the same size as a fallback
+    //         return math.matrix(math.zeros(laplacian.size())) as Matrix;
+    //     }
+    // }
 
 
     public getDegreeMatrix(weighted: boolean = false): Matrix {
