@@ -10,7 +10,8 @@ import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import useWindowDimensions from "Hooks/useWindowDimensions";
 import DegreeHistogramTab from "Tabs/DegreeHistogramTab";
 import GraphGeneratorPopup from './GraphGenerator/GraphGeneratorPopup'; // Import the new component
-import './App.css'; // Import CSS for styling the popup
+import './App.css';
+import GraphSpectrumPlotTab from "Tabs/GraphSpectrumSplotTab"; // Import CSS for styling the popup
 
 const App: React.FC = () => {
     const initialNodes = [0, 1, 2, 3];
@@ -60,6 +61,7 @@ const App: React.FC = () => {
                                 <GraphMatricesTab graph={graph} />
                                 <GraphMetricsTab graph={graph} />
                                 <GraphLocalMetricsTab graph={graph} />
+                                <GraphSpectrumPlotTab graph={graph} />
                                 <GraphSpectrumTab graph={graph} />
                                 <DegreeHistogramTab graph={graph} />
                                 {/* Add more tabs here */}

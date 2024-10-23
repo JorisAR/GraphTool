@@ -3,14 +3,24 @@ import { GraphGenerator } from './GraphGenerator';
 import { GraphGeneratorErdosRenyi } from './GraphGeneratorErdosRenyi';
 import Graph from "Graphs/Graph";
 import {GraphGeneratorSmallWorld} from "GraphGenerator/GraphGeneratorSmallWorld";
+import {GraphGeneratorLine} from "GraphGenerator/LineGraphGenerator";
+import {GraphGeneratorStar} from "GraphGenerator/StarGraphGenerator";
+import {GraphGeneratorTree} from "GraphGenerator/TreeGraphGenerator";
+import {GraphGeneratorFullyConnected} from "GraphGenerator/FullyConnectedGraphGenerator";
+import {GraphGeneratorBarabasiAlbert} from "GraphGenerator/BarabasiAlbertGraphGenerator";
 
 const GraphGeneratorPopup: React.FC<{ onClose: () => void, onUpdateGraph: (graph: Graph) => void }> = ({ onClose, onUpdateGraph }) => {
     const [selectedGenerator, setSelectedGenerator] = useState<GraphGenerator | null>(null);
     const [generatorSettings, setGeneratorSettings] = useState({});
 
     const graphGenerators = [
+        new GraphGeneratorLine(),
+        new GraphGeneratorStar(),
+        new GraphGeneratorTree(),
+        new GraphGeneratorFullyConnected(),
         new GraphGeneratorErdosRenyi(),
-        new GraphGeneratorSmallWorld()
+        new GraphGeneratorSmallWorld(),
+        new GraphGeneratorBarabasiAlbert()
         // Add other graph generators here
     ];
 

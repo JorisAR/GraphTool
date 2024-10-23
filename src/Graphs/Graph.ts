@@ -151,7 +151,7 @@ class Graph {
     }
 
     public getPseudoInverse(weighted: boolean = false): Matrix {
-        const { values, vectors } = this.getSpectralDecomposition();
+        const { values, vectors } = this.getSpectralDecomposition(weighted);
         const epsilon = 1e-10; // small value to prevent division by zero
 
         try {
@@ -326,9 +326,9 @@ class Graph {
         return diameter;
     }
 
-    public getSpectralDecomposition(): { vectors: Matrix, values: Matrix } {
+    public getSpectralDecomposition(weighted: boolean = false): { vectors: Matrix, values: Matrix } {
         try {
-            let { eigenvectors } = math.eigs(this.adjacencyMatrix);
+            let { eigenvectors } = math.eigs(this.getLaplacianMatrix(weighted));
             eigenvectors = eigenvectors.sort((a, b) => (b.value as number) - (a.value as number));
             const eigenVectors = eigenvectors.map((obj: any) => obj.vector);
             const Values = eigenvectors.map((obj: any) => obj.value);
