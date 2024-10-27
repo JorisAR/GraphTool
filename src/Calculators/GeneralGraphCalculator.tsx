@@ -119,7 +119,7 @@ export class GeneralGraphCalculator extends CalculatorBase {
             if (expectedDegree !== undefined) {
                 Ed = expectedDegree;
                 this.state.n = Ed;
-                this.state.l = Ed / this.state.n;
+                this.state.l = (Ed * this.state.n) /2;
                 formula = formula + `= ${Ed}`
             }
         }
