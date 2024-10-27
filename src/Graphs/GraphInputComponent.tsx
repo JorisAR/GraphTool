@@ -11,7 +11,7 @@ interface GraphInputComponentProps {
 
 const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graph, onUpdateGraph }) => {
     const [input, setInput] = useState(graph.toString());
-    const [presets, setPresets] = useState<{ name: string, content: string }[]>([]);
+    const [presets, setPresets] = useState<{ name: string, content: string, directed: boolean }[]>([]);
     const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
     const [isDirected, setIsDirected] = useState(graph.getIsDirected());
     const [matrix, setMatrix] = useState<Matrix>(graph.getAdjacencyMatrix());
@@ -31,14 +31,26 @@ const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graph, onUpda
             const presetPromises = files.map(async (file: string) => {
                 const response = await fetch(root + `/${file}`);
                 const content = await response.text();
-                const name = content.split('\n')[0].split(':')[1].trim();
-                return { name, content };
+                const lines = content.split('\n');
+                let name = "";
+                let directed = false;
+                for (const line of lines) {
+                    const contentParts = line.split(':');
+                    if (contentParts.length >= 2) {
+                        if (contentParts[0].trim().toLowerCase() === "name")
+                            name = contentParts[1].trim();
+                        if (contentParts[0].trim().toLowerCase() === "directed")
+                            directed = contentParts[1].trim() === "true";
+                    }
+                }
+                return { name, content, directed };
             });
             const loadedPresets = await Promise.all(presetPromises);
             setPresets(loadedPresets);
         };
         loadPresets();
     }, []);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setInput(e.target.value);
@@ -52,12 +64,15 @@ const GraphInputComponent: React.FC<GraphInputComponentProps> = ({ graph, onUpda
     const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const preset = presets.find(p => p.name === e.target.value);
         if (preset) {
+            const newGraph = Graph.stringToGraph(preset.content, preset.directed);
             setSelectedPreset(preset.name);
             setInput(preset.content);
-            const newGraph = Graph.stringToGraph(preset.content, isDirected);
+            setIsDirected(preset.directed);
             onUpdateGraph(newGraph);
         }
     };
+
+
 
     const handleToggleDirected = () => {
         const directed = !graph.getIsDirected();

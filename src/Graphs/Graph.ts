@@ -1,4 +1,5 @@
 import {all, create, Matrix} from 'mathjs';
+import GraphTool from "GraphTool";
 
 const math = create(all);
 
@@ -9,7 +10,7 @@ class Graph {
     private readonly isDirected: boolean;
     private readonly weights: number[];
 
-    constructor(private readonly matrix: Matrix, nodeList?: number[], isDirected = false, weights?: number[]) {
+    private constructor(private readonly matrix: Matrix, nodeList?: number[], isDirected = false, weights?: number[]) {
         this.adjacencyMatrix = matrix;
         this.nodeAliasMap = new Map();
         this.nodeList = nodeList || [];
@@ -27,12 +28,18 @@ class Graph {
 
     public makeSymmetric() {
         const size = this.adjacencyMatrix.size()[0];
-        for(let i = 0; i < size; i++) {
-            for(let j = 0; j < size; j++) {
-                this.adjacencyMatrix.set([i,j], math.max(this.adjacencyMatrix.get([j,i]), this.adjacencyMatrix.get([i,j])));
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                //const weight = this.weights?.[i] || 1;
+                const value1 = this.adjacencyMatrix.get([i, j]);
+                const value2 = this.adjacencyMatrix.get([j, i]);
+                const maxValue = math.max(value1, value2);
+                this.adjacencyMatrix.set([i, j], maxValue);
+                this.adjacencyMatrix.set([j, i], maxValue);
             }
         }
     }
+
 
     // ----------------------------------------- Static Functions -----------------------------------------
 
@@ -64,7 +71,8 @@ class Graph {
         const finalWeights: number[] = hasWeights ? weights.map(w => (w === undefined ? 1 : w)) : [];
 
         const result = Graph.fromNodesAndLinks(nodes, links, isDirected, finalWeights);
-        result.makeSymmetric();
+        if(!isDirected)
+            result.makeSymmetric();
         return result;
     }
 
@@ -144,36 +152,41 @@ class Graph {
 
         links.forEach(([i, j], index) => {
             incidenceMatrix.set([i, index], 1);
-            incidenceMatrix.set([j, index], this.isDirected ? -1 : 1);
+            incidenceMatrix.set([j, index], -1);
+            //might need this instead: incidenceMatrix.set([j, index], this.isDirected ? -1 : 1);
         });
 
         return incidenceMatrix as Matrix;
     }
 
     public getPseudoInverse(weighted: boolean = false): Matrix {
-        const { values, vectors } = this.getSpectralDecomposition(weighted);
+        const laplacian = this.getLaplacianMatrix(weighted);
+        const { values, vectors } = Graph.getSpectralDecomposition(laplacian);
         const epsilon = 1e-10; // small value to prevent division by zero
 
         try {
             let pseudoInverse = math.matrix(math.zeros(this.adjacencyMatrix.size()));
+            const n = this.getNodeCount();
 
-            for (let i = 0; i < this.getNodeCount(); i++) {
-                const column = math.column(vectors, i);
+            for (let i = 0; i < n; i++) {
                 const eigenvalue = values.get([i, i]);
-                const term = math.multiply(math.multiply(column, math.transpose(column)), 1 / (eigenvalue + epsilon)); // Adjusting for zero eigenvalues
-                pseudoInverse = math.add(pseudoInverse, term);
+                if (Math.abs(eigenvalue) > epsilon) {
+                    const column = math.reshape(math.column(vectors, i), [n, 1]);
+                    const term = math.multiply(math.multiply(column, math.transpose(column)), 1 / eigenvalue);
+                    pseudoInverse = math.add(pseudoInverse, term);
+                }
             }
 
             return pseudoInverse as Matrix;
         } catch (error) {
             console.error("Error calculating pseudoinverse: ", error);
-            // Handle gracefully: Return a zero matrix of the same size as a fallback
             return math.matrix(math.zeros(this.adjacencyMatrix.size())) as Matrix;
         }
     }
 
 
-    public getPseudoInverseAlt(weighted: boolean = false): Matrix {
+
+/*    public getPseudoInverseAlt(weighted: boolean = false): Matrix {
         const laplacian = this.getLaplacianMatrix(weighted);
         const alpha = 0.1;
         const onesMatrix = math.matrix(math.ones(this.adjacencyMatrix.size()));
@@ -189,7 +202,7 @@ class Graph {
             // Handle gracefully: Return a zero matrix of the same size as a fallback
             return math.matrix(math.zeros(laplacian.size())) as Matrix;
         }
-    }
+    }*/
 
 
     public getDegreeMatrix(weighted: boolean = false): Matrix {
@@ -220,6 +233,15 @@ class Graph {
         const weightedAdjacencyMatrix = this.adjacencyMatrix.map((value, index) => value * (weighted ? (this.weights[index[0]] || 1) : 1));
         return math.subtract(degreeMatrix, weightedAdjacencyMatrix) as Matrix;
     }
+
+    // public getLaplacianMatrix(weighted: boolean = false): Matrix {
+    //     const B = this.getIncidenceMatrix();
+    //     if (!weighted) return math.multiply(B, math.transpose(B)) as Matrix;
+    //
+    //     const edgeWeights = math.diag(this.weights) as Matrix;
+    //     return math.multiply(math.multiply(B, edgeWeights), math.transpose(B)) as Matrix;
+    // }
+
 
     public getComplementGraph(): Matrix {
         const size = this.adjacencyMatrix.size();
@@ -332,9 +354,9 @@ class Graph {
         return diameter;
     }
 
-    public getSpectralDecomposition(weighted: boolean = false): { vectors: Matrix, values: Matrix } {
+    public static getSpectralDecomposition(matrix: Matrix): { vectors: Matrix, values: Matrix } {
         try {
-            let { eigenvectors } = math.eigs(this.getLaplacianMatrix(weighted));
+            let { eigenvectors } = math.eigs(matrix);
             eigenvectors = eigenvectors.sort((a, b) => (b.value as number) - (a.value as number));
             const eigenVectors = eigenvectors.map((obj: any) => obj.vector);
             const Values = eigenvectors.map((obj: any) => obj.value);
@@ -343,7 +365,7 @@ class Graph {
             return { vectors: X, values: Diag };
         } catch (error) {
             console.error("Eigenvalues failed to converge:", error);
-            const size = this.adjacencyMatrix.size();
+            const size = matrix.size();
             const I = math.identity(size[0]) as Matrix;
             const Z = math.matrix(math.zeros(size[0], size[1]));
             return { vectors: I, values: Z };

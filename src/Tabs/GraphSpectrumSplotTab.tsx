@@ -5,17 +5,19 @@ import { InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import { Line } from 'react-chartjs-2';
 import { all, create } from 'mathjs';
-import { Dropdown } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { DensityPlot} from "Components/DensityPlot";
+import { DensityPlot } from "Components/DensityPlot";
+
 const math = create(all);
 
 interface GraphSpectrumTabProps {
     graph: Graph;
 }
+
 const GraphSpectrumPlotTab: React.FC<GraphSpectrumTabProps> = ({ graph }) => {
     const [viewMode, setViewMode] = useState('eigenvalues');
-    const { vectors, values } = graph.getSpectralDecomposition();
+    const [useAdjacency, setUseAdjacency] = useState(false);
+    const { vectors, values } = Graph.getSpectralDecomposition(useAdjacency ? graph.getAdjacencyMatrix() : graph.getLaplacianMatrix());
     const eigenValues = (values.toArray() as number[][]).map((row: number[], index) => Math.abs(row[index]));
     const transposedVectors = math.transpose(vectors).toArray() as number[][];
 
@@ -58,6 +60,9 @@ const GraphSpectrumPlotTab: React.FC<GraphSpectrumTabProps> = ({ graph }) => {
     return (
         <CollapsibleTab title="Spectrum Plots">
             <div>
+                <button onClick={() => setUseAdjacency(!useAdjacency)}>
+                    Shown Spectrum: {useAdjacency ? "Adjacency" : "Laplacian"}
+                </button><br/>
                 <select onChange={(e) => setViewMode(e.target.value)}>
                     <option value="eigenvalues">Eigenvalues</option>
                     <option value="eigenvectors">Eigenvectors</option>
@@ -66,7 +71,7 @@ const GraphSpectrumPlotTab: React.FC<GraphSpectrumTabProps> = ({ graph }) => {
                 {viewMode === 'eigenvalues' && <Line data={eigenvalueData} options={options} />}
                 {viewMode === 'eigenvectors' && <Line data={eigenvectorData} options={options} />}
                 {viewMode === 'density' && <DensityPlot width={600} height={400} data={eigenValues} />}
-                    </div>
+            </div>
         </CollapsibleTab>
     );
 };

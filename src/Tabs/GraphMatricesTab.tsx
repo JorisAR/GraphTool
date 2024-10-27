@@ -15,7 +15,7 @@ const GraphMatricesTab: React.FC<GraphLaplacianTabProps> = ({ graph }) => {
     const degreeString = Graph.LatexMatrix(graph.getDegreeMatrix(false));
     const weightsString = Graph.LatexMatrix(graph.getWeightMatrix());
     const weightedPseudoInverseString = Graph.LatexMatrix(graph.getPseudoInverse(true), 3);
-    const weightedPseudoInverseStringAlt = Graph.LatexMatrix(graph.getPseudoInverseAlt(true), 3);
+    //const weightedPseudoInverseStringAlt = Graph.LatexMatrix(graph.getPseudoInverseAlt(true), 3);
 
     return (
         <CollapsibleTab title="Matrices">
@@ -47,7 +47,7 @@ const GraphMatricesTab: React.FC<GraphLaplacianTabProps> = ({ graph }) => {
                 {/*</div>*/}
                 <div>
                     <h3>PseudoInverse Matrix Q (Alt)</h3>
-                    <InlineMath math={weightedPseudoInverseStringAlt}/>
+                    <InlineMath math={weightedPseudoInverseString}/>
                 </div>
 
             </div>

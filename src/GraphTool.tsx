@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {Panel, PanelGroup, PanelResizeHandle} from "react-resizable-panels";
+import React, { useState } from 'react';
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import GraphVisualiserComponent from "Graphs/GraphVisualiserComponent";
 import GraphInputComponent from "Graphs/GraphInputComponent";
 import GraphMatricesTab from "Tabs/GraphMatricesTab";
@@ -9,22 +9,23 @@ import GraphSpectrumPlotTab from "Tabs/GraphSpectrumSplotTab";
 import GraphSpectrumTab from "Tabs/GraphSpectrumTab";
 import DegreeHistogramTab from "Tabs/DegreeHistogramTab";
 import Graph from "Graphs/Graph";
-import useWindowDimensions from "Hooks/useWindowDimensions";
+import ElectricalTab from "Tabs/ElectricalTab";
+
+const initialNodes = [0, 1, 2, 3];
+const initialLinks: [number, number][] = [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 0],
+];
+const initialGraph = Graph.fromNodesAndLinks(initialNodes, initialLinks, false);
 
 const GraphTool: React.FC = () => {
+    const [graph, setGraph] = useState(initialGraph);
 
-    const initialNodes = [0, 1, 2, 3];
-    const initialLinks: [number, number][] = [
-        [0, 1],
-        [1, 2],
-        [2, 3],
-        [3, 0],
-    ];
-    const [graph, setGraph] = useState(Graph.fromNodesAndLinks(initialNodes, initialLinks));
     const handleUpdateGraph = (graph: Graph) => {
         setGraph(graph);
     };
-    const { width, height } = useWindowDimensions();
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -53,6 +54,7 @@ const GraphTool: React.FC = () => {
                                 <GraphSpectrumPlotTab graph={graph} />
                                 <GraphSpectrumTab graph={graph} />
                                 <DegreeHistogramTab graph={graph} />
+                                <ElectricalTab graph={graph} />
                                 {/* Add more tabs here */}
                             </div>
                         </div>
@@ -61,6 +63,6 @@ const GraphTool: React.FC = () => {
             </div>
         </div>
     );
-}
+};
 
 export default GraphTool;

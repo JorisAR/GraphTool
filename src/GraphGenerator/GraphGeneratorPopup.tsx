@@ -8,6 +8,7 @@ import {GraphGeneratorStar} from "GraphGenerator/StarGraphGenerator";
 import {GraphGeneratorTree} from "GraphGenerator/TreeGraphGenerator";
 import {GraphGeneratorFullyConnected} from "GraphGenerator/FullyConnectedGraphGenerator";
 import {GraphGeneratorBarabasiAlbert} from "GraphGenerator/BarabasiAlbertGraphGenerator";
+import "./Popup.css"
 
 const GraphGeneratorPopup: React.FC<{ onClose: () => void, onUpdateGraph: (graph: Graph) => void }> = ({ onClose, onUpdateGraph }) => {
     const [selectedGenerator, setSelectedGenerator] = useState<GraphGenerator | null>(null);
