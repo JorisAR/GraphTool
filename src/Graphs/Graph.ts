@@ -173,17 +173,23 @@ class Graph {
     }
 
 
-    // public getPseudoInverse(weighted: boolean = false): Matrix {
-    //     const laplacian = this.getLaplacianMatrix(weighted);
-    //     try {
-    //         const pseudoInverse = math.pinv(laplacian);
-    //         return pseudoInverse as Matrix;
-    //     } catch (error) {
-    //         console.error("Error calculating pseudoinverse: ", error);
-    //         // Handle gracefully: Return a zero matrix of the same size as a fallback
-    //         return math.matrix(math.zeros(laplacian.size())) as Matrix;
-    //     }
-    // }
+    public getPseudoInverseAlt(weighted: boolean = false): Matrix {
+        const laplacian = this.getLaplacianMatrix(weighted);
+        const alpha = 0.1;
+        const onesMatrix = math.matrix(math.ones(this.adjacencyMatrix.size()));
+        const N = this.nodeList.length;
+        try {
+            const pseudoInverse = math.subtract(
+                math.pinv(math.subtract(laplacian, math.multiply(alpha, onesMatrix))),
+                math.multiply(1 / (alpha * N * N), onesMatrix)
+            ) as math.Matrix;
+            return pseudoInverse as Matrix;
+        } catch (error) {
+            console.error("Error calculating pseudoinverse: ", error);
+            // Handle gracefully: Return a zero matrix of the same size as a fallback
+            return math.matrix(math.zeros(laplacian.size())) as Matrix;
+        }
+    }
 
 
     public getDegreeMatrix(weighted: boolean = false): Matrix {

@@ -15,34 +15,39 @@ const GraphMatricesTab: React.FC<GraphLaplacianTabProps> = ({ graph }) => {
     const degreeString = Graph.LatexMatrix(graph.getDegreeMatrix(false));
     const weightsString = Graph.LatexMatrix(graph.getWeightMatrix());
     const weightedPseudoInverseString = Graph.LatexMatrix(graph.getPseudoInverse(true), 3);
+    const weightedPseudoInverseStringAlt = Graph.LatexMatrix(graph.getPseudoInverseAlt(true), 3);
 
     return (
         <CollapsibleTab title="Matrices">
             <div>
-            <div>
-                <h3>Adjacency Matrix A</h3>
-                <InlineMath math={adjacencyString} />
-            </div>
+                <div>
+                    <h3>Adjacency Matrix A</h3>
+                    <InlineMath math={adjacencyString}/>
+                </div>
 
                 <div>
                     <h3>Degree Matrix D</h3>
-                    <InlineMath math={degreeString} />
+                    <InlineMath math={degreeString}/>
                 </div>
-            <div>
-                <h3>Laplacian Matrix Q</h3>
-                <InlineMath math={laplacianString} />
-            </div>
+                <div>
+                    <h3>Laplacian Matrix Q</h3>
+                    <InlineMath math={laplacianString}/>
+                </div>
                 <div>
                     <h3>Weights Matrix Delta</h3>
-                    <InlineMath math={weightsString} />
+                    <InlineMath math={weightsString}/>
                 </div>
                 <div>
                     <h3>Incidence Matrix B</h3>
-                    <InlineMath math={incidenceString} />
+                    <InlineMath math={incidenceString}/>
                 </div>
+                {/*<div>*/}
+                {/*    <h3>PseudoInverse Matrix Q</h3>*/}
+                {/*    <InlineMath math={weightedPseudoInverseString}/>*/}
+                {/*</div>*/}
                 <div>
-                    <h3>PseudoInverse Matrix Q</h3>
-                    <InlineMath math={weightedPseudoInverseString} />
+                    <h3>PseudoInverse Matrix Q (Alt)</h3>
+                    <InlineMath math={weightedPseudoInverseStringAlt}/>
                 </div>
 
             </div>
