@@ -17,6 +17,11 @@ const ElectricalTab: React.FC<ElectricalTabProps> = ({ graph }) => {
     const [nodePotentials, setNodePotentials] = useState<Matrix | null>(null);
     const [currentVector, setCurrentVector] = useState<Matrix | null>(null);
 
+    const [currentVectorInput, setCurrentVectorInput] = useState<string>('');
+    const [potentialVectorInput, setPotentialVectorInput] = useState<string>('');
+    const [dissipatedPower, setDissipatedPower] = useState<number | null>(null);
+
+
     const laplacianPseudoInverse = graph.getPseudoInverse(true);
     const n = graph.getNodeCount();
     const u = math.ones(n, 1);
@@ -49,9 +54,39 @@ const ElectricalTab: React.FC<ElectricalTabProps> = ({ graph }) => {
         const B = graph.getIncidenceMatrix();
         const y = math.multiply(math.transpose(B), v) as Matrix;
 
-        setNodePotentials(v);
-        setCurrentVector(y);
+        setNodePotentials(math.transpose(v));
+        setCurrentVector(math.transpose(y));
     };
+
+    const handleCalculatePower = () => {
+        const B = graph.getIncidenceMatrix();
+        let currentVector : Matrix = B;
+        let calculate = false;
+
+        if (currentVectorInput) {
+            const currentVectorArray = currentVectorInput.split(',').map(Number);
+            currentVector = math.reshape(math.matrix(currentVectorArray), [currentVectorArray.length, 1]);
+            calculate = true;
+
+        } else if (potentialVectorInput) {
+            const potentialVectorArray = potentialVectorInput.split(',').map(Number);
+            const potentialVector = math.reshape(math.matrix(potentialVectorArray), [potentialVectorArray.length, 1]);
+            currentVector = math.multiply(B, potentialVector);
+            calculate = true;
+        }
+        if(calculate) {
+            const resistanceMatrix = math.diag(graph.getEdgeWeightList());
+            const power = math.divide(math.sum(math.dotMultiply(currentVector, currentVector)), math.sum(resistanceMatrix)) as number;
+
+            setDissipatedPower(power);
+        } else {
+            setDissipatedPower(0);
+        }
+
+
+    };
+
+
 
 
 
@@ -60,6 +95,7 @@ const ElectricalTab: React.FC<ElectricalTabProps> = ({ graph }) => {
 
     return (
         <CollapsibleTab title="Electrical Circuits">
+            <h2>Resistance</h2>
             <div>
                 <h3>Effective Resistance Matrix Ω</h3>
                 <InlineMath math={OmegaString} />
@@ -72,6 +108,8 @@ const ElectricalTab: React.FC<ElectricalTabProps> = ({ graph }) => {
                 <h3>Effective Graph Resistance</h3>
                 <InlineMath math={ResistanceString} />
             </div>
+            <br/>
+            <h2>Current Injection</h2>
             <div>
                 <h3>Current Injection Vector (x)</h3>
                 <input
@@ -94,6 +132,33 @@ const ElectricalTab: React.FC<ElectricalTabProps> = ({ graph }) => {
                     <InlineMath math={CurrentVectorString} />
                 </div>
             )}
+            {/*<h2>Power Calculation</h2>*/}
+            {/*<div>*/}
+            {/*    <h3>Current Vector (CSV)</h3>*/}
+            {/*    <input*/}
+            {/*        type="text"*/}
+            {/*        value={currentVectorInput}*/}
+            {/*        onChange={(e) => setCurrentVectorInput(e.target.value)}*/}
+            {/*        placeholder="e.g. 2,0,-2"*/}
+            {/*    />*/}
+            {/*</div>*/}
+            {/*<div>*/}
+            {/*    <h3>Potential Vector (CSV)</h3>*/}
+            {/*    <input*/}
+            {/*        type="text"*/}
+            {/*        value={potentialVectorInput}*/}
+            {/*        onChange={(e) => setPotentialVectorInput(e.target.value)}*/}
+            {/*        placeholder="e.g. 5,3,1"*/}
+            {/*    />*/}
+            {/*</div>*/}
+            {/*<button onClick={handleCalculatePower}>Calculate Dissipated Power</button>*/}
+            {/*{dissipatedPower !== null && (*/}
+            {/*    <div>*/}
+            {/*        <h3>Dissipated Power</h3>*/}
+            {/*        <InlineMath math={`P = ${dissipatedPower.toFixed(4)}`} />*/}
+            {/*    </div>*/}
+            {/*)}*/}
+
         </CollapsibleTab>
     );
 };

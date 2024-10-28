@@ -10,9 +10,13 @@ const GraphLocalMetricsTab: React.FC<GraphLocalMetricsTabProps> = ({ graph }) =>
     const [selectedNode, setSelectedNode] = useState<number | null>(null);
 
     let degree = 0;
+    let clusteringCoefficient = 0;
+    let betweenness = 0;
 
-    if(selectedNode !== null) {
+    if (selectedNode !== null) {
         degree = graph.getDegree(selectedNode.valueOf());
+        clusteringCoefficient = graph.calculateClusteringCoefficient(selectedNode);
+        betweenness = graph.calculateBetweenness(selectedNode);
     }
 
     const handleNodeSelect = (node: number) => {
@@ -35,8 +39,9 @@ const GraphLocalMetricsTab: React.FC<GraphLocalMetricsTabProps> = ({ graph }) =>
             {selectedNode !== null && (
                 <div>
                     <h4>Metrics for Node {selectedNode}</h4>
-                    {/* Add specific metrics calculations here for the selected node */}
                     <p>Node degree: {degree}</p>
+                    <p>Clustering Coefficient: {clusteringCoefficient.toFixed(4)}</p>
+                    <p>Betweenness Centrality: {betweenness.toFixed(4)}</p>
                 </div>
             )}
         </CollapsibleTab>

@@ -22,7 +22,6 @@ class Graph {
                 this.nodeAliasMap.set(node, index);
             });
         }
-
         if(!isDirected) this.makeSymmetric();
     }
 
@@ -295,6 +294,38 @@ class Graph {
         return nodeCount ? (2 * linkCount) / nodeCount : 0;
     }
 
+    public calculateClusteringCoefficient(node: number): number {
+        const nodeIndex = this.nodeAliasMap.get(node);
+        if (nodeIndex !== undefined) {
+            const size = this.adjacencyMatrix.size()[0];
+            let triangles = 0;
+            let triples = 0;
+
+            const neighbors = [];
+            for (let j = 0; j < size; j++) {
+                if (this.adjacencyMatrix.get([nodeIndex, j]) !== 0) {
+                    neighbors.push(j);
+                }
+            }
+
+            const degree = neighbors.length;
+            if (degree < 2) return 0;
+
+            for (let i = 0; i < degree; i++) {
+                for (let j = i + 1; j < degree; j++) {
+                    if (this.adjacencyMatrix.get([neighbors[i], neighbors[j]]) !== 0) {
+                        triangles++;
+                    }
+                    triples++;
+                }
+            }
+
+            return triples ? triangles / triples : 0;
+        }
+        return 0;
+    }
+
+
     public getClusteringCoefficient(): number {
         const size = this.adjacencyMatrix.size()[0];
         let triangles = 0;
@@ -371,6 +402,76 @@ class Graph {
             return { vectors: I, values: Z };
         }
     }
+
+    public calculateBetweenness(selectedNode: number): number {
+        const nodeIndex = this.nodeAliasMap.get(selectedNode);
+        if (nodeIndex !== undefined) {
+            const n = this.getNodeCount();
+            const laplacian = this.getLaplacianMatrix();
+            const { values, vectors } = Graph.getSpectralDecomposition(laplacian);
+
+            let betweenness = 0;
+
+            // Skip the zero eigenvalue and its eigenvector
+            for (let i = 0; i < n - 1; i++) {
+                const lambda = values.get([i, i]);
+                const eigenvector = math.column(vectors, i);
+
+                for (let j = 0; j < n; j++) {
+                    if (j !== nodeIndex) {
+                        const diff = eigenvector.get([j, 0]) - eigenvector.get([nodeIndex, 0]);
+                        betweenness += (diff * diff) / lambda;
+                    }
+                }
+            }
+            return betweenness;
+        }
+        return 0;
+    }
+
+
+    public calculateAverageBetweenness(): number {
+        const size = this.getNodeCount();
+        let totalBetweenness = 0;
+
+        this.nodeAliasMap.forEach((node: number, index: number) => {
+            totalBetweenness += this.calculateBetweenness(node);
+        });
+
+        return totalBetweenness / size;
+    }
+
+
+
+
+    public getTriangleCount(): number {
+        const size = this.adjacencyMatrix.size()[0];
+        let triangles = 0;
+
+        for (let i = 0; i < size; i++) {
+            for (let j = i + 1; j < size; j++) {
+                if (this.adjacencyMatrix.get([i, j]) !== 0) {
+                    for (let k = j + 1; k < size; k++) {
+                        if (this.adjacencyMatrix.get([i, k]) !== 0 && this.adjacencyMatrix.get([j, k]) !== 0) {
+                            triangles++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return triangles;
+    }
+
+
+    public calculateAlgebraicConnectivity(): number {
+        const laplacian = this.getLaplacianMatrix();
+        const { values } = Graph.getSpectralDecomposition(laplacian);
+        const n = this.getNodeCount();
+        const i = n  - 2;
+        return values.get([i,i]); // Second smallest eigenvalue
+    }
+
 
     /// converts to user readable format!
     public toString(): string {
