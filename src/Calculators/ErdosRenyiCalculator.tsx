@@ -14,6 +14,13 @@ export class ErdosRenyiCalculator extends CalculatorBase {
         p: undefined
     };
 
+    reset = () => {
+        this.setState({
+            n: undefined,
+            p: undefined
+        });
+    }
+
     getUI(onSettingsUpdate: (name: string, value: any) => void): JSX.Element {
         return (
             <div>
@@ -53,29 +60,68 @@ export class ErdosRenyiCalculator extends CalculatorBase {
                 {
                     formula: `E[L] = \\frac{n(n - 1)}{2} * p`,
                     result: NaN
+                },
+                {
+                    formula: `E[ClusterCoefficient] = p`,
+                    result: NaN
+                },
+
+                {formula: `\\large{-- DegreeDistributionStatistics --}`, result: NaN},
+                {
+                    formula: `E[D] = (N - 1)p = \\mu`,
+                    result: NaN
+                },
+                {
+                    formula: `V[D] = (N - 1)p(1-p) = \\sigma^{2}`,
+                    result: NaN
+                },
+                {
+                    formula: `E[\\lambda] = 0`,
+                    result: NaN
+                },
+                {
+                    formula: `V[\\lambda] = E[D] `,
+                    result: NaN
                 }
             ];
         }
 
         const pc = Math.log(n) / n;
         const expectedLinkCount = (n * (n - 1)) / 2 * p;
+        const expectedDegree = (n-1) * p;
+        const varDegree = (n-1) * p * (1-p);
 
         return [
             {
-                formula: `p_c = \\frac{\\log(${n})}{${n}} = ${pc.toFixed(4)}`,
+                formula: `p_c = \\frac{\\log(n)}{n} = \\frac{\\log(${n})}{${n}} = ${pc.toFixed(4)}`,
                 result: pc
             },
             {
-                formula: `E[L] = \\frac{${n}(${n} - 1)}{2} * ${p} = ${expectedLinkCount.toFixed(4)}`,
+                formula: `E[L] = \\frac{n(n - 1)}{2} * p = \\frac{${n}(${n} - 1)}{2} * ${p} = ${expectedLinkCount.toFixed(4)}`,
                 result: expectedLinkCount
+            },
+            {
+                formula: `E[ClusterCoefficient] = p = ${p}`,
+                result: p
+            },
+
+            {formula: `\\large{-- DegreeDistributionStatistics --}`, result: NaN},
+            {
+                formula: `E[D] = (${n} - 1)${p} = \\mu = ${expectedDegree}`,
+                result: expectedDegree
+            },
+            {
+                formula: `V[D] = (${n} - 1)${p}(1-${p}) = \\sigma^{2} = ${varDegree}`,
+                result: varDegree
+            },
+            {
+                formula: `E[\\lambda] = 0`,
+                result: NaN
+            },
+            {
+                formula: `V[\\lambda] = E[D] = ${expectedDegree}`,
+                result: expectedDegree
             }
         ];
-    }
-
-    reset = () => {
-        this.setState({
-            n: undefined,
-            p: undefined
-        });
     }
 }

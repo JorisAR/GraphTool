@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { ErdosRenyiCalculator } from './Calculators/ErdosRenyiCalculator';
+import {GeneralGraphCalculator} from "./Calculators/GeneralGraphCalculator";
 
 const calculators = [
     { name: 'Erdős-Rényi Random Graph', component: ErdosRenyiCalculator },
+    { name: 'General Graph Calculator', component:GeneralGraphCalculator},
     // Add more calculators here
 ];
 
