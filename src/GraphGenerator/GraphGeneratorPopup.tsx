@@ -9,6 +9,7 @@ import {GraphGeneratorTree} from "GraphGenerator/TreeGraphGenerator";
 import {GraphGeneratorFullyConnected} from "GraphGenerator/FullyConnectedGraphGenerator";
 import {GraphGeneratorBarabasiAlbert} from "GraphGenerator/BarabasiAlbertGraphGenerator";
 import "./Popup.css"
+import {GraphGeneratorLattice} from "GraphGenerator/GraphGeneratorLattice";
 
 const GraphGeneratorPopup: React.FC<{ onClose: () => void, onUpdateGraph: (graph: Graph) => void }> = ({ onClose, onUpdateGraph }) => {
     const [selectedGenerator, setSelectedGenerator] = useState<GraphGenerator | null>(null);
@@ -19,9 +20,11 @@ const GraphGeneratorPopup: React.FC<{ onClose: () => void, onUpdateGraph: (graph
         new GraphGeneratorStar(),
         new GraphGeneratorTree(),
         new GraphGeneratorFullyConnected(),
+        new GraphGeneratorLattice(),
+        new GraphGeneratorStar(),
         new GraphGeneratorErdosRenyi(),
         new GraphGeneratorSmallWorld(),
-        new GraphGeneratorBarabasiAlbert()
+        new GraphGeneratorBarabasiAlbert(),
         // Add other graph generators here
     ];
 

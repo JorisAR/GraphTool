@@ -22,7 +22,7 @@ class Graph {
                 this.nodeAliasMap.set(node, index);
             });
         }
-        if(!isDirected) this.makeSymmetric();
+        if (!isDirected) this.makeSymmetric();
     }
 
     public makeSymmetric() {
@@ -42,8 +42,8 @@ class Graph {
 
     // ----------------------------------------- Static Functions -----------------------------------------
 
-    public static LatexMatrix(matrix : Matrix, round?:number) : string {
-        if(round) {
+    public static LatexMatrix(matrix: Matrix, round?: number): string {
+        if (round) {
             matrix = math.round(matrix, round);
         }
         return `\\begin{bmatrix} ${(matrix.toArray() as number[][]).map(row => row.join(' & ')).join(' \\\\ ')} \\end{bmatrix}`;
@@ -60,7 +60,7 @@ class Graph {
             const parts = line.split(':');
             const [a, b] = parts[0].split(',').map(Number);
 
-            if(nodes.indexOf(a) > -1 && nodes.indexOf(b) > -1) {
+            if (nodes.indexOf(a) > -1 && nodes.indexOf(b) > -1) {
                 links.push([a, b]);
                 weights.push(parts[1] ? parseFloat(parts[1]) : undefined);
             }
@@ -70,7 +70,7 @@ class Graph {
         const finalWeights: number[] = hasWeights ? weights.map(w => (w === undefined ? 1 : w)) : [];
 
         const result = Graph.fromNodesAndLinks(nodes, links, isDirected, finalWeights);
-        if(!isDirected)
+        if (!isDirected)
             result.makeSymmetric();
         return result;
     }
@@ -108,11 +108,11 @@ class Graph {
 
     // ----------------------------------------- GETTERS / SETTERS -----------------------------------------
 
-    public getIsDirected() : boolean {
+    public getIsDirected(): boolean {
         return this.isDirected;
     }
 
-    public getIsWeighted() : boolean {
+    public getIsWeighted(): boolean {
         return this.weights.length === this.getLinkCount();
     }
 
@@ -132,6 +132,16 @@ class Graph {
         return this.nodeList.length;
     }
 
+    public getRaisedAdjacencyMatrix(k: number): Matrix {
+        if (k < 1) throw new Error('k must be greater than or equal to 1');
+        let result = this.adjacencyMatrix;
+        for (let i = 1; i < k; i++) {
+            result = math.multiply(this.adjacencyMatrix, result) as Matrix;
+        }
+        return result;
+
+    }
+
     // ----------------------------------------- Compute Matrices -----------------------------------------
 
     public getLinks(): [number, number][] {
@@ -142,6 +152,18 @@ class Graph {
             }
         });
         return links;
+    }
+
+    public getDegreeAssortativity(): number {
+        const N1 = math.sum(this.getRaisedAdjacencyMatrix(1)) as number;
+        const N2 = math.sum(this.getRaisedAdjacencyMatrix(2)) as number;
+        const N3 = math.sum(this.getRaisedAdjacencyMatrix(3)) as number;
+        const degrees = this.adjacencyMatrix.map(row => math.sum(row));
+        const degreeSumCubed = math.sum(degrees.map(degree => Math.pow(degree, 3))) as number;
+        const numerator = N1 * N3 - Math.pow(N2, 2);
+        const denominator = N1 * degreeSumCubed - Math.pow(N2, 2);
+        if (denominator === 0) throw new Error('Division by zero encountered in assortativity calculation');
+        return numerator / denominator;
     }
 
     public getIncidenceMatrix(): Matrix {
@@ -158,9 +180,30 @@ class Graph {
         return incidenceMatrix as Matrix;
     }
 
+    public getModularityMatrix(): Matrix {
+        const adjacencyMatrix = this.adjacencyMatrix;
+        const degreeMatrix = this.getDegreeMatrix();
+        const L = (math.sum(degreeMatrix) as number) / 2;
+        const d = this.adjacencyMatrix.map(row => math.sum(row));
+        const dTranspose = math.transpose(d);
+        const ddTranspose = math.multiply(d, dTranspose);
+        const factor = 1 / (2 * L);
+        const modularityMatrix = math.subtract(adjacencyMatrix, math.multiply(factor, ddTranspose)) as Matrix;
+        return modularityMatrix;
+    }
+
+    // public getModularity(S: Matrix): number {
+    //     const modularityMatrix = this.getModularityMatrix();
+    //     const STranspose = math.transpose(S);
+    //     const trace = math.trace(math.multiply(math.multiply(STranspose, modularityMatrix), S));
+    //     const degreeSum = math.sum(this.getDegreeMatrix()) as number;
+    //     const L = degreeSum / 2;
+    //     return trace / (2 * L);
+    // }
+
     public getPseudoInverse(weighted: boolean = false): Matrix {
         const laplacian = this.getLaplacianMatrix(weighted);
-        const { values, vectors } = Graph.getSpectralDecomposition(laplacian);
+        const {values, vectors} = Graph.getSpectralDecomposition(laplacian);
         const epsilon = 1e-10; // small value to prevent division by zero
 
         try {
@@ -184,24 +227,23 @@ class Graph {
     }
 
 
-
-/*    public getPseudoInverseAlt(weighted: boolean = false): Matrix {
-        const laplacian = this.getLaplacianMatrix(weighted);
-        const alpha = 0.1;
-        const onesMatrix = math.matrix(math.ones(this.adjacencyMatrix.size()));
-        const N = this.nodeList.length;
-        try {
-            const pseudoInverse = math.subtract(
-                math.pinv(math.subtract(laplacian, math.multiply(alpha, onesMatrix))),
-                math.multiply(1 / (alpha * N * N), onesMatrix)
-            ) as math.Matrix;
-            return pseudoInverse as Matrix;
-        } catch (error) {
-            console.error("Error calculating pseudoinverse: ", error);
-            // Handle gracefully: Return a zero matrix of the same size as a fallback
-            return math.matrix(math.zeros(laplacian.size())) as Matrix;
-        }
-    }*/
+    /*    public getPseudoInverseAlt(weighted: boolean = false): Matrix {
+            const laplacian = this.getLaplacianMatrix(weighted);
+            const alpha = 0.1;
+            const onesMatrix = math.matrix(math.ones(this.adjacencyMatrix.size()));
+            const N = this.nodeList.length;
+            try {
+                const pseudoInverse = math.subtract(
+                    math.pinv(math.subtract(laplacian, math.multiply(alpha, onesMatrix))),
+                    math.multiply(1 / (alpha * N * N), onesMatrix)
+                ) as math.Matrix;
+                return pseudoInverse as Matrix;
+            } catch (error) {
+                console.error("Error calculating pseudoinverse: ", error);
+                // Handle gracefully: Return a zero matrix of the same size as a fallback
+                return math.matrix(math.zeros(laplacian.size())) as Matrix;
+            }
+        }*/
 
 
     public getDegreeMatrix(weighted: boolean = false): Matrix {
@@ -246,7 +288,7 @@ class Graph {
         const size = this.adjacencyMatrix.size();
         const I = math.identity(size[0]);
         const J = math.matrix(math.ones(size[0], size[1]));
-        const result =  math.matrix(math.subtract(math.subtract(J, I), this.adjacencyMatrix) as Matrix);
+        const result = math.matrix(math.subtract(math.subtract(J, I), this.adjacencyMatrix) as Matrix);
         console.log(`result; ${result}`);
         return math.matrix(result);
     }
@@ -263,8 +305,9 @@ class Graph {
     }
 
     private linkCount = -1;
+
     public getLinkCount(): number {
-        if(this.linkCount >= 0) return this.linkCount;
+        if (this.linkCount >= 0) return this.linkCount;
         let count = 0;
         this.adjacencyMatrix.forEach(value => {
             if (value !== 0) count++;
@@ -387,19 +430,19 @@ class Graph {
 
     public static getSpectralDecomposition(matrix: Matrix): { vectors: Matrix, values: Matrix } {
         try {
-            let { eigenvectors } = math.eigs(matrix);
+            let {eigenvectors} = math.eigs(matrix);
             eigenvectors = eigenvectors.sort((a, b) => (b.value as number) - (a.value as number));
             const eigenVectors = eigenvectors.map((obj: any) => obj.vector);
             const Values = eigenvectors.map((obj: any) => obj.value);
             const X = math.transpose(math.matrix(eigenVectors)) as Matrix;
             const Diag = math.matrix(math.diag(Values)) as Matrix;
-            return { vectors: X, values: Diag };
+            return {vectors: X, values: Diag};
         } catch (error) {
             console.error("Eigenvalues failed to converge:", error);
             const size = matrix.size();
             const I = math.identity(size[0]) as Matrix;
             const Z = math.matrix(math.zeros(size[0], size[1]));
-            return { vectors: I, values: Z };
+            return {vectors: I, values: Z};
         }
     }
 
@@ -408,7 +451,7 @@ class Graph {
         if (nodeIndex !== undefined) {
             const n = this.getNodeCount();
             const laplacian = this.getLaplacianMatrix();
-            const { values, vectors } = Graph.getSpectralDecomposition(laplacian);
+            const {values, vectors} = Graph.getSpectralDecomposition(laplacian);
 
             let betweenness = 0;
 
@@ -442,8 +485,6 @@ class Graph {
     }
 
 
-
-
     public getTriangleCount(): number {
         const size = this.adjacencyMatrix.size()[0];
         let triangles = 0;
@@ -466,10 +507,10 @@ class Graph {
 
     public calculateAlgebraicConnectivity(): number {
         const laplacian = this.getLaplacianMatrix();
-        const { values } = Graph.getSpectralDecomposition(laplacian);
+        const {values} = Graph.getSpectralDecomposition(laplacian);
         const n = this.getNodeCount();
-        const i = n  - 2;
-        return values.get([i,i]); // Second smallest eigenvalue
+        const i = n - 2;
+        return values.get([i, i]); // Second smallest eigenvalue
     }
 
 

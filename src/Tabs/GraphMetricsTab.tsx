@@ -15,6 +15,7 @@ const GraphMetricsTab: React.FC<GraphMetricsTabProps> = ({ graph }) => {
     const algebraicConnectivity = graph.calculateAlgebraicConnectivity();
     const triangleCount = graph.getTriangleCount();
     const betweennessCentrality = graph.calculateAverageBetweenness(); // Add this line
+    const degreeAssortativity = graph.getDegreeAssortativity();
 
     return (
         <CollapsibleTab title="Global Metrics">
@@ -26,6 +27,7 @@ const GraphMetricsTab: React.FC<GraphMetricsTabProps> = ({ graph }) => {
             <p>Algebraic Connectivity: {algebraicConnectivity.toFixed(3)}</p>
             <p>Triangle Count: {triangleCount}</p>
             <p>Average Betweenness: {betweennessCentrality}</p>
+            <p>Degree Assortativity: {degreeAssortativity}</p>
         </CollapsibleTab>
     );
 };
