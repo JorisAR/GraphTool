@@ -162,7 +162,7 @@ class Graph {
         const degreeSumCubed = math.sum(degrees.map(degree => Math.pow(degree, 3))) as number;
         const numerator = N1 * N3 - Math.pow(N2, 2);
         const denominator = N1 * degreeSumCubed - Math.pow(N2, 2);
-        if (denominator === 0) throw new Error('Division by zero encountered in assortativity calculation');
+        if (denominator === 0) return 0;
         return numerator / denominator;
     }
 
